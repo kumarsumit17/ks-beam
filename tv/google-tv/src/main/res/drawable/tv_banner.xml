@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- KS Beam TV banner (320 × 180): the white screen-and-beam mark on violet, our own design. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp" android:height="180dp"
+    android:viewportWidth="320" android:viewportHeight="180">
+    <path android:fillColor="#7C5CFF" android:pathData="M0,0h320v180h-320z" />
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="6" android:strokeLineJoin="round"
+        android:pathData="M108,58h44a5,5 0,0 1,5 5v40a5,5 0,0 1,-5 5h-16" />
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="6" android:strokeLineCap="round" android:pathData="M96,92a16,16 0,0 1,16 16" />
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="6" android:strokeLineCap="round" android:pathData="M96,78a30,30 0,0 1,30 30" />
+    <path android:fillColor="#FFFFFF" android:pathData="M96,103a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M180,70h14a10,10 0,0 1,4 19a10,10 0,0 1,-4 21h-14z M188,78v8h6a4,4 0,0 0,0 -8z M188,94v8h6a4,4 0,0 0,0 -8z M206,70h20v8h-12v8h10v8h-10v8h12v8h-20z M240,70h8l12,40h-8l-2,-8h-12l-2,8h-8z M244,80l-4,14h8z M264,70h8l6,16l6,-16h8v40h-8v-24l-6,14l-6,-14v24h-8z" />
+</vector>

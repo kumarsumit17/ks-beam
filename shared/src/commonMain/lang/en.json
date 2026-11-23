@@ -15,5 +15,10 @@
   "cast.seekForward": "Forward 10 seconds",
   "error.noResponse": "The TV didn't respond. Check that it's still on and on the same Wi-Fi.",
   "error.format": "The TV can't play this file (error {code}). MP4 videos and MP3 music play on most TVs.",
-  "error.refused": "The TV refused the request (error {code})."
+  "error.refused": "The TV refused the request (error {code}).",
+  "receiver.ready": "Ready to receive",
+  "receiver.howTo": "On your phone or computer, open KS Beam and choose {name}. Apps that cast with DLNA find it too.",
+  "receiver.noNetwork": "Connect this TV to Wi-Fi or Ethernet to receive.",
+  "receiver.cantPlay": "This TV can't play {title}.",
+  "receiver.backHint": "Press Back to stop."
 }

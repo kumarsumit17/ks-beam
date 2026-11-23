@@ -1,0 +1,43 @@
+name: Release
+
+# The release workflow is shared by every KS-Suite Kotlin app and lives in ks-utility
+# (specs/release-workflow.md there). This file only names KS Beam's platforms.
+#
+#   Tag push vMAJOR.MINOR.PATCH   Builds the signed APK (phone sender + Google TV receiver), the macOS dmg and the
+#                                 Windows msi, then publishes the GitHub Release.
+#   Manual run (rehearsal)        Builds and checks everything for the version given; never publishes.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to rehearse, X.Y.Z. Builds everything, releases nothing."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    uses: kumarsumit17/ks-utility/.github/workflows/kotlin-app-release.yml@v0.4.2
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    with:
+      version: ${{ inputs.version }}
+      app-name: ks-beam
+      display-name: KS Beam
+      android-module: ":mobile:android"
+      mac-module: ":desktop:mac"
+      windows-module: ":desktop:windows"
+      test-tasks: ":shared:desktopTest :shared:check"
+      desktop-test-tasks: ":shared:desktopTest"
+    secrets: inherit

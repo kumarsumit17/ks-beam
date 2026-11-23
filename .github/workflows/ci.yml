@@ -1,0 +1,81 @@
+# Checks on every push and pull request, and on a manual run (Actions > CI > Run workflow).
+# Release builds are in release.yml (ks-utility's shared workflow). The debug APK and the unsigned
+# Windows installer built here are kept as workflow artifacts for 14 days, for hand testing.
+# Runner images are named versions, never -latest; actions are pinned to a full commit SHA, the
+# same ones ks-utility's shared release workflow uses.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Casting core and receiver tests, language files, the Android APK (phone sender, TV receiver).
+  android:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+      - run: ./gradlew --no-daemon :shared:desktopTest :shared:check :mobile:android:assembleDebug
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: android-debug-apk
+          path: mobile/android/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  # The desktop tests on Windows, then the .msi: built, installed silently, uninstalled.
+  windows:
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+      - run: ./gradlew --no-daemon :shared:desktopTest :desktop:windows:packageReleaseMsi
+      - name: Install and uninstall silently
+        shell: pwsh
+        run: |
+          $msi = @(Get-ChildItem -Recurse desktop/windows/build/compose/binaries -Filter *.msi)
+          if ($msi.Count -ne 1) { Write-Error "expected one .msi, found $($msi.Count)"; exit 1 }
+          $p = Start-Process msiexec -ArgumentList "/i `"$($msi[0].FullName)`" /qn /l*v install.log" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { Get-Content install.log -Tail 40; exit 1 }
+          $exe = Get-ChildItem -Recurse "$env:ProgramFiles\KS Beam" -Filter "KS Beam.exe" -ErrorAction SilentlyContinue
+          if (-not $exe) { Write-Error "KS Beam.exe was not installed"; exit 1 }
+          $p = Start-Process msiexec -ArgumentList "/x `"$($msi[0].FullName)`" /qn" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { exit 1 }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-msi-unsigned
+          path: desktop/windows/build/compose/binaries/**/*.msi
+          if-no-files-found: error
+          retention-days: 14

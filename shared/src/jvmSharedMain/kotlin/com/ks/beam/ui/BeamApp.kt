@@ -118,20 +118,26 @@ private fun Header(state: BeamState) {
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(1f),
         )
-        var open by remember { mutableStateOf(false) }
-        Box {
-            TextButton(onClick = { open = true }) { Text(stringResource(Res.string.common_language)) }
-            DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-                listOf(
-                    LanguageChoice.System to Res.string.common_language_system,
-                    LanguageChoice.English to Res.string.common_language_english,
-                    LanguageChoice.Hindi to Res.string.common_language_hindi,
-                ).forEach { (choice, label) ->
-                    DropdownMenuItem(
-                        text = { Text((if (choice == state.languageChoice) "✓  " else "     ") + stringResource(label)) },
-                        onClick = { state.chooseLanguage(choice); open = false },
-                    )
-                }
+        LanguageMenu(state.languageChoice, state::chooseLanguage)
+    }
+}
+
+/** The suite's language choice: Same as the system, English, हिंदी. Shared by the sender and the receiver. */
+@Composable
+fun LanguageMenu(choice: LanguageChoice, onChoose: (LanguageChoice) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        TextButton(onClick = { open = true }) { Text(stringResource(Res.string.common_language)) }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            listOf(
+                LanguageChoice.System to Res.string.common_language_system,
+                LanguageChoice.English to Res.string.common_language_english,
+                LanguageChoice.Hindi to Res.string.common_language_hindi,
+            ).forEach { (option, label) ->
+                DropdownMenuItem(
+                    text = { Text((if (option == choice) "✓  " else "     ") + stringResource(label)) },
+                    onClick = { onChoose(option); open = false },
+                )
             }
         }
     }

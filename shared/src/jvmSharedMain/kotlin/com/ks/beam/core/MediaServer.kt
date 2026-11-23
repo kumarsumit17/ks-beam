@@ -18,7 +18,11 @@ import java.util.concurrent.Executors
  * Serves the files being cast over HTTP/1.1, with byte ranges, only at addresses carrying a
  * 128-bit random token (specs/casting.md, section 2; specs/constraints.md).
  */
-class MediaServer(private val bindAddress: InetAddress) : AutoCloseable {
+class MediaServer(
+    private val bindAddress: InetAddress,
+    /** The host renderers use to reach this server; differs from [bindAddress] behind NAT (emulators). */
+    private val advertisedHost: String = bindAddress.hostAddress,
+) : AutoCloseable {
     private val server = ServerSocket().apply {
         reuseAddress = true
         bind(InetSocketAddress(bindAddress, 0))
@@ -43,8 +47,7 @@ class MediaServer(private val bindAddress: InetAddress) : AutoCloseable {
         val token = ByteArray(16).also(random::nextBytes).joinToString("") { "%02x".format(it) }
         files[token] = media
         val name = URLEncoder.encode(media.name, "UTF-8").replace("+", "%20")
-        val host = bindAddress.hostAddress
-        return "http://$host:$port/m/$token/$name"
+        return "http://$advertisedHost:$port/m/$token/$name"
     }
 
     fun unpublishAll() = files.clear()
@@ -60,20 +63,12 @@ class MediaServer(private val bindAddress: InetAddress) : AutoCloseable {
         socket.soTimeout = 30_000
         val input = BufferedInputStream(socket.getInputStream())
         val out = socket.getOutputStream()
-        val requestLine = readLine(input) ?: return
-        val headers = mutableMapOf<String, String>()
-        while (true) {
-            val line = readLine(input) ?: return
-            if (line.isEmpty()) break
-            val i = line.indexOf(':')
-            if (i > 0) headers[line.substring(0, i).trim().lowercase()] = line.substring(i + 1).trim()
-        }
-        val parts = requestLine.split(' ')
-        if (parts.size < 2) return respond(out, 400, "Bad Request")
-        val method = parts[0]
+        val request = HttpRequest.read(input) ?: return
+        val headers = request.headers
+        val method = request.method
         if (method != "GET" && method != "HEAD") return respond(out, 405, "Method Not Allowed")
 
-        val segments = parts[1].substringBefore('?').split('/')
+        val segments = request.path.split('/')
         val media = if (segments.size >= 3 && segments[1] == "m") files[segments[2]] else null
         if (media == null) return respond(out, 404, "Not Found")
 
@@ -141,17 +136,6 @@ class MediaServer(private val bindAddress: InetAddress) : AutoCloseable {
         fun localAddressFor(host: String): InetAddress = DatagramSocket().use { s ->
             s.connect(InetSocketAddress(host, 1900))
             s.localAddress
-        }
-
-        private fun readLine(input: InputStream): String? {
-            val sb = StringBuilder()
-            while (true) {
-                val b = input.read()
-                if (b == -1) return if (sb.isEmpty()) null else sb.toString()
-                if (b == '\n'.code) return sb.toString().trimEnd('\r')
-                if (sb.length > 8192) return null
-                sb.append(b.toChar())
-            }
         }
 
         private fun copy(input: InputStream, out: OutputStream, length: Long) {

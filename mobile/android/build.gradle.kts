@@ -1,6 +1,6 @@
 import java.util.Properties
 
-// The Android phone app (sender).
+// The one Android APK: the sender on phones, the receiver on Google TV (from :tv:google-tv).
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -59,6 +59,7 @@ android {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(project(":tv:google-tv"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.runtime)
     implementation(libs.compose.ui)

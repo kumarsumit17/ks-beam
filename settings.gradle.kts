@@ -21,4 +21,4 @@ includeBuild("ks-utility/kotlin")
 
 include(":shared")
 include(":desktop:mac", ":desktop:windows")
-include(":mobile:android")
+include(":mobile:android", ":tv:google-tv")

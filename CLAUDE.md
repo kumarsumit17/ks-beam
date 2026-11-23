@@ -21,7 +21,9 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 | `shared/src/desktopMain` | Window, file dialog and settings for macOS and Windows |
 | `shared/src/androidMain` | Content-URI files, settings and language for Android |
 | `shared/src/desktopTest` | Core tests against a fake renderer and a fake SSDP responder |
-| `mobile/android/` | Android entry point (`com.ks.beam`) |
+| `shared/src/jvmSharedMain/.../core/receiver` | Receiver protocol: SSDP announcer, description and control server (`specs/receiver.md`) |
+| `mobile/android/` | The one APK (`com.ks.beam`): sender on phones, receiver on Google TV |
+| `tv/google-tv/` | Receiver playback (Media3), ready screen, leanback entry and banner; merged into the APK |
 | `desktop/mac/`, `desktop/windows/` | Desktop entry points and native packaging (.dmg, .msi) |
 
 ## Constraints
@@ -37,11 +39,11 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 ./gradlew :desktop:mac:run                    # macOS (or :desktop:windows:run on Windows)
 ./gradlew :desktop:mac:packageReleaseDmg      # .dmg; needs a non-Homebrew JDK (e.g. Corretto) or CI
 ```
-The phone emulator is behind its own NAT and never sees TVs on the Wi-Fi; test discovery and casting on a real phone or the desktop app. Emulators: the workspace's `scripts/emulators.sh` and `specs/testing.md`.
+Emulators are behind their own NAT and can't be discovered. Test the receiver on the TV emulator by forwarding its port and casting from the Mac: `adb forward tcp:49152 tcp:<port from logcat "receiver ready at">`, then `KS_BEAM_RENDERER=http://127.0.0.1:49152/desc.xml KS_BEAM_MEDIA=<file.mp4> KS_BEAM_MEDIA_HOST=10.0.2.2 ./gradlew :shared:desktopTest --tests '*EmulatorCastTest*'`. Emulators: the workspace's `scripts/emulators.sh` and `specs/testing.md`.
 
 ## Platform folders
 - Every KS-Suite app repo has the same top-level platform folders: `tv/google-tv/`, `desktop/mac/`, `desktop/windows/`, `mobile/android/` and `mobile/ios/`. All five exist in every app repo, whether or not the app supports that platform yet.
-- This app targets `mobile/android`, `desktop/windows` and `desktop/mac` (senders). `tv/google-tv` is planned (the receiver, milestone 3) and holds only a `.gitkeep` until then; `mobile/ios` is not a target. Do not add code for a platform that is not a target without the owner asking.
+- This app targets `mobile/android`, `desktop/windows` and `desktop/mac` (senders) and `tv/google-tv` (the receiver, in the same APK). `mobile/ios` is not a target. Do not add code for a platform that is not a target without the owner asking.
 - Three layers, narrowest first: a platform folder holds code for one platform of this app; `shared/` holds code used by two or more platforms, written once and never copied between platform folders; `ks-utility` holds generic code used by several apps.
 - Never rename, merge or remove these folders, and never add another top-level platform folder; the layout is a suite-wide rule.
 

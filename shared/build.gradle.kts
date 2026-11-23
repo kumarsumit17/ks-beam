@@ -85,3 +85,10 @@ compose.resources {
         directoryProvider = languageResources.map { langResources.get() },
     )
 }
+
+// The emulator cast test runs only when these point at a running receiver and a media file.
+tasks.withType<Test>().configureEach {
+    listOf("KS_BEAM_RENDERER", "KS_BEAM_MEDIA", "KS_BEAM_MEDIA_HOST", "KS_BEAM_HOLD_MS").forEach { name ->
+        providers.environmentVariable(name).orNull?.let { environment(name, it) }
+    }
+}
