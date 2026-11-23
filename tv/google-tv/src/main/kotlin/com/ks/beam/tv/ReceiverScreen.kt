@@ -110,7 +110,6 @@ private fun Playback(target: ExoTarget) {
             PlayerView(context).apply {
                 player = target.player
                 useController = true
-                controllerShowTimeoutMs = 3000
                 keepScreenOn = true
                 requestFocus()
             }
