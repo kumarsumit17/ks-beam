@@ -6,7 +6,7 @@ Cast videos, music and photos from your phone or computer to a TV or projector. 
 |---|---|
 | **Platform** | Android phone · Windows · macOS (send) · Google TV and Android TV (receive) |
 | **Tech stack** | Kotlin Multiplatform, Compose Multiplatform; DLNA / UPnP AV with no third-party casting library |
-| **Status** | First release v1.0.0: milestone 1 of the [plan](specs/plan-v1.md) |
+| **Status** | First release v1.0.1 (v1.0.0 was tagged but never released): milestone 1 of the [plan](specs/plan-v1.md) |
 
 ## How it works
 

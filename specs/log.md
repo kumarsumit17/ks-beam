@@ -1,4 +1,5 @@
 # 2026-11-23
 
+* **Release**: `v1.0.0` was tagged but never released: its run stopped at the keystore check because the signing secrets were still being set; nothing was published. The first release is `v1.0.1`, the same code.
 * **Creation**: [Receiver](receiver.md) added: the same APK is a DLNA renderer on Google TV (SSDP, description, AVTransport, ConnectionManager, RenderingControl, Media3 playback). [Overview](overview.md), [Plan to v1](plan-v1.md) (receiver and releases moved into milestone 1) and [Constraints](constraints.md) (cleartext HTTP on the local network) updated.
 * **Creation**: [Overview](overview.md), [Casting](casting.md), [Plan to v1](plan-v1.md), [Constraints](constraints.md) and [Dependencies](dependencies.md) added: KS Beam casts files from Android, Windows and macOS to DLNA TVs and projectors; a Google TV receiver is planned.

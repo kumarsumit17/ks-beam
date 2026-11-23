@@ -7,7 +7,7 @@ tags: [plan, milestones]
 
 # Plan to v1
 
-## Milestone 1: cast a file, and receive on Google TV (released as v1.0.0)
+## Milestone 1: cast a file, and receive on Google TV (released as v1.0.1; v1.0.0 was never released)
 
 - Shared casting core: discovery, the file server, playback control ([Casting](casting.md)), with unit tests that run against a fake renderer.
 - Interface on Android, Windows and macOS: the renderers found, choose a file, cast, play/pause, seek ±10 s and by the bar, stop. Language setting (Same as the system, English, हिंदी).
