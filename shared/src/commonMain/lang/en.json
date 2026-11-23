@@ -1,0 +1,19 @@
+{
+  "app.name": "KS Beam",
+  "devices.title": "TVs and projectors",
+  "devices.searching": "Looking for TVs and projectors…",
+  "devices.refresh": "Search again",
+  "devices.empty": "No TVs or projectors found. Check that the TV is on and on the same Wi-Fi as this device, and that media sharing (DLNA) is turned on in its settings.",
+  "devices.choose": "Choose a TV or projector to cast to.",
+  "cast.chooseFile": "Choose a file to cast",
+  "cast.unsupported": "KS Beam can't cast this kind of file. Choose a video, a music file or a photo.",
+  "cast.to": "Casting to {device}",
+  "cast.starting": "Starting on the TV…",
+  "cast.play": "Play",
+  "cast.stop": "Stop casting",
+  "cast.seekBack": "Back 10 seconds",
+  "cast.seekForward": "Forward 10 seconds",
+  "error.noResponse": "The TV didn't respond. Check that it's still on and on the same Wi-Fi.",
+  "error.format": "The TV can't play this file (error {code}). MP4 videos and MP3 music play on most TVs.",
+  "error.refused": "The TV refused the request (error {code})."
+}
