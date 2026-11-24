@@ -1,0 +1,12 @@
+{
+  "name": "KS Beam",
+  "group": "media",
+  "icon": "cast",
+  "platforms": ["android", "windows", "macos", "google-tv"],
+  "platformStatus": { "windows": "beta" },
+  "stack": "Kotlin Multiplatform",
+  "tagline": {
+    "en": "Cast videos, music and photos from your phone or computer to a TV or projector.",
+    "hi": "फ़ोन या कंप्यूटर से वीडियो, संगीत और फ़ोटो TV या प्रोजेक्टर पर कास्ट करें।"
+  }
+}
