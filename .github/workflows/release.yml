@@ -3,7 +3,8 @@ name: Release
 # The release workflow is shared by every KS-Suite Kotlin app and lives in ks-utility
 # (specs/release-workflow.md there). This file only names KS Beam's platforms.
 #
-#   Tag push vMAJOR.MINOR.PATCH   Builds the signed APK (phone sender + Google TV receiver), the macOS dmg and the
+#   Tag push vMAJOR.MINOR.PATCH   Builds the signed phone APK (sender), the signed Google TV APK
+#                                 (receiver, -google-tv.apk), their AABs, the macOS dmg and the
 #                                 Windows msi, then publishes the GitHub Release.
 #   Manual run (rehearsal)        Builds and checks everything for the version given; never publishes.
 
@@ -36,6 +37,7 @@ jobs:
       app-name: ks-beam
       display-name: KS Beam
       android-module: ":mobile:android"
+      tv-module: ":tv:google-tv"
       mac-module: ":desktop:mac"
       windows-module: ":desktop:windows"
       test-tasks: ":shared:desktopTest :shared:check"

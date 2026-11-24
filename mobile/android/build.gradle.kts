@@ -1,65 +1,17 @@
-import java.util.Properties
-
-// The one Android APK: the sender on phones, the receiver on Google TV (from :tv:google-tv).
+// The phone app: the sender. The casting core and the interface are in :shared; this module adds
+// the activity (file picker, multicast lock) and the phone launcher entry. Package name, version
+// and signing: the root build.gradle.kts, shared with the Google TV app (tv/google-tv), which is a
+// separate APK.
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
 
-val keystoreProperties = Properties().apply {
-    val file = rootProject.file("keystore.properties")
-    if (file.exists()) file.inputStream().use(::load)
-}
-
-// Blank counts as missing: GitHub Actions passes an unset secret as an empty string.
-fun signingValue(env: String, key: String): String? =
-    providers.environmentVariable(env).orNull?.takeIf { it.isNotBlank() }
-        ?: keystoreProperties.getProperty(key)?.takeIf { it.isNotBlank() }
-
-val storeFilePath = signingValue("SIGNING_STORE_FILE", "storeFile")
-
 android {
     namespace = "com.ks.beam.android"
-    compileSdk = libs.versions.androidCompileSdk.get().toInt()
-
-    defaultConfig {
-        applicationId = "com.ks.beam"
-        minSdk = libs.versions.androidMinSdk.get().toInt()
-        targetSdk = libs.versions.androidTargetSdk.get().toInt()
-        versionCode = rootProject.extra["appVersionCode"] as Int
-        versionName = rootProject.extra["appVersionName"] as String
-    }
-
-    signingConfigs {
-        if (storeFilePath != null) {
-            create("release") {
-                storeFile = file(storeFilePath)
-                storePassword = signingValue("SIGNING_STORE_PASSWORD", "storePassword")
-                keyAlias = signingValue("SIGNING_KEY_ALIAS", "keyAlias")
-                keyPassword = signingValue("SIGNING_KEY_PASSWORD", "keyPassword")
-            }
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.findByName("release")
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    buildFeatures { compose = true }
-    androidResources { localeFilters += listOf("en", "hi") }
 }
 
 dependencies {
-    implementation(project(":shared"))
-    implementation(project(":tv:google-tv"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.runtime)
     implementation(libs.compose.ui)

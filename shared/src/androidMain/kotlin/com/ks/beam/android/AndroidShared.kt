@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.LocaleList
 import android.provider.OpenableColumns
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -63,6 +64,12 @@ class ContentMediaSource private constructor(
             return ContentMediaSource(resolver, uri, name, mime, size.coerceAtLeast(0))
         }
     }
+}
+
+/** The system's preferred languages, as BCP 47 tags (the suite language rule's "follow the system"). */
+fun systemLanguageTags(): List<String> {
+    val list = LocaleList.getDefault()
+    return (0 until list.size()).map { list[it].toLanguageTag() }
 }
 
 class PrefsStore(private val prefs: SharedPreferences) : SettingsStore {

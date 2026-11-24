@@ -1,3 +1,7 @@
+# 2026-11-24
+
+* **Update**: [Overview](overview.md) and [Receiver](receiver.md): the one Android APK is split into a phone app (`mobile/android`, the sender) and a Google TV app (`tv/google-tv`, the receiver, `-google-tv.apk`), with the same package name, version and keystore; the TV `versionCode` adds 1,000,000,000. ks-utility moved to `v0.6.0`.
+
 # 2026-11-23
 
 * **Release**: `v1.0.0` was tagged but never released: its run stopped at the keystore check because the signing secrets were still being set; nothing was published. The first release is `v1.0.1`, the same code.

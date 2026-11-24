@@ -16,10 +16,12 @@ KS Beam sends videos, music and photos from a phone or computer to a TV or proje
 | Android phone | `mobile/android` | Sender |
 | Windows | `desktop/windows` | Sender |
 | macOS | `desktop/mac` | Sender |
-| Google TV, Android TV and projectors | `tv/google-tv` | Receiver ([Receiver](receiver.md)): the same APK |
+| Google TV, Android TV and projectors | `tv/google-tv` | Receiver ([Receiver](receiver.md)): a separate Google TV app, same package name |
 | iOS | `mobile/ios` | Not a target |
 
 Code used by more than one platform is in `shared/` (Kotlin Multiplatform): the casting core and the whole interface.
+
+On Android there are two apps from v1.1.0, with the same package name (`com.ks.beam`), version and signing key: the phone app (`mobile/android`, `ks-beam-v<version>.apk`) is the sender and the Google TV app (`tv/google-tv`, `ks-beam-v<version>-google-tv.apk`) is the receiver. Each has its own interface and launcher entry, so TV changes cannot break the phone app. The role comes from the app installed, never from the device. The TV app's `versionCode` adds 1,000,000,000 (the suite's versioning spec), so the phone app is never installed over it. Up to v1.0.1 one APK did both, switching at runtime.
 
 ## How it reaches a TV or projector
 

@@ -7,9 +7,9 @@ tags: [receiver, google-tv, dlna, upnp]
 
 # Receiver
 
-The one Android APK is the sender on phones and the **receiver** on Google TV and Android TV (switched at runtime with `UiModeManager`). The receiver makes a TV or Android projector a DLNA *MediaRenderer*, so KS Beam on a phone or computer, or any app that casts with DLNA, can play on it.
+The Google TV app (`tv/google-tv`, `ks-beam-v<version>-google-tv.apk`, a separate APK from the phone app with the same package name) is the **receiver** on Google TV and Android TV ([Overview](overview.md)). The receiver makes a TV or Android projector a DLNA *MediaRenderer*, so KS Beam on a phone or computer, or any app that casts with DLNA, can play on it.
 
-Code: the protocol in `shared/src/jvmSharedMain/kotlin/com/ks/beam/core/receiver/` (tested on the desktop JVM, including casting from KS Beam's own sender); playback and the screen in `tv/google-tv/`.
+Code: the protocol in `shared/src/jvmSharedMain/kotlin/com/ks/beam/core/receiver/` (tested on the desktop JVM, including casting from KS Beam's own sender); playback, the screen and the activity (`ReceiverActivity`) in `tv/google-tv/`.
 
 ## 1. Being found (`SsdpAdvertiser`)
 

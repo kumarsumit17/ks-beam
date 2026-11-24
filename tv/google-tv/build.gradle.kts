@@ -1,23 +1,17 @@
-// Google TV: the KS Beam receiver (Media3 playback, the ready screen, the leanback launcher entry).
-// One APK serves phone and TV; this library is merged into it by :mobile:android.
+// The Google TV app: the KS Beam receiver (Media3 playback, the ready screen), a separate APK and
+// AAB (<app>-v<version>-google-tv.apk) with the Leanback launcher entry and the banner. The
+// receiver protocol, settings and languages are in :shared. Package name, version (plus the TV
+// offset) and signing: the root build.gradle.kts.
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "com.ks.beam.tv"
-    compileSdk = libs.versions.androidCompileSdk.get().toInt()
-    defaultConfig { minSdk = libs.versions.androidMinSdk.get().toInt() }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures { compose = true }
 }
 
 dependencies {
-    implementation(project(":shared"))
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)
     implementation(libs.androidx.activity.compose)

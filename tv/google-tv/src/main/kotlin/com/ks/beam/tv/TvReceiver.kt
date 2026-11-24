@@ -1,8 +1,6 @@
 package com.ks.beam.tv
 
-import android.app.UiModeManager
 import android.content.Context
-import android.content.res.Configuration
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.provider.Settings
@@ -11,12 +9,6 @@ import com.ks.beam.core.SsdpDiscovery
 import com.ks.beam.core.receiver.PlaybackTarget
 import com.ks.beam.core.receiver.Receiver
 import java.util.UUID
-
-/** True on Google TV and Android TV (the one APK switches to the receiver there). */
-fun isTelevision(context: Context): Boolean {
-    val ui = context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
-    return ui.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION
-}
 
 /** The name senders show for this TV: its device name from Settings, else the model. */
 fun tvName(context: Context): String =
