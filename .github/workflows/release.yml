@@ -3,20 +3,30 @@ name: Release
 # The release workflow is shared by every KS-Suite Kotlin app and lives in ks-utility
 # (specs/release-workflow.md there). This file only names KS Beam's platforms.
 #
-#   Tag push vMAJOR.MINOR.PATCH   Builds the signed phone APK (sender), the signed Google TV APK
-#                                 (receiver, -google-tv.apk), their AABs, the macOS dmg and the
-#                                 Windows msi, then publishes the GitHub Release.
-#   Manual run (rehearsal)        Builds and checks everything for the version given; never publishes.
+#   Tag push vMAJOR.MINOR.PATCH   Builds every platform: the signed phone APK (sender), the signed
+#                                 Google TV APK (receiver, -google-tv.apk), their AABs, the macOS dmg
+#                                 and the Windows msi, then publishes the GitHub Release.
+#   Tag push <platform>-vX.Y.Z    android, google-tv, mac or windows: builds and releases only that
+#                                 platform, with its own version (KS-Suite specs/versioning-signing.md,
+#                                 "Platform tags"). Not marked latest. KS Beam has no updater, so no
+#                                 bridge release was needed.
+#   Manual run (rehearsal)        Builds and checks the version and platform given; never publishes.
 
 on:
   push:
-    tags: ["v*.*.*"]
+    tags: ["v*.*.*", "android-v*.*.*", "google-tv-v*.*.*", "mac-v*.*.*", "windows-v*.*.*"]
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to rehearse, X.Y.Z. Builds everything, releases nothing."
+        description: "Version to rehearse, X.Y.Z. Builds, releases nothing."
         required: true
         type: string
+      platform:
+        description: "Platform to rehearse, as a platform tag would build it."
+        required: false
+        type: choice
+        options: [all, android, google-tv, mac, windows]
+        default: all
 
 permissions:
   contents: read
@@ -27,13 +37,14 @@ concurrency:
 
 jobs:
   release:
-    uses: kumarsumit17/ks-utility/.github/workflows/kotlin-app-release.yml@v0.6.0
+    uses: kumarsumit17/ks-utility/.github/workflows/kotlin-app-release.yml@v0.10.1
     permissions:
       contents: write
       id-token: write
       attestations: write
     with:
       version: ${{ inputs.version }}
+      platform: ${{ inputs.platform }}
       app-name: ks-beam
       display-name: KS Beam
       android-module: ":mobile:android"

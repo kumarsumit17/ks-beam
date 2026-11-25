@@ -21,7 +21,8 @@ fun git(vararg args: String): String? = runCatching {
 
 val appVersionName: String =
     providers.gradleProperty("versionName").orNull
-        ?: git("describe", "--tags", "--abbrev=0")?.removePrefix("v")
+        // The latest tag, plain (v1.2.0) or with a platform (mac-v1.2.1): the number after the v.
+        ?: git("describe", "--tags", "--abbrev=0")?.let { Regex("""v(\d+\.\d+\.\d+)$""").find(it)?.groupValues?.get(1) }
         ?: "0.0.0" // A build from source: no version, so it never checks for updates by itself.
 
 val appVersionCode: Int =
