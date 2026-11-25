@@ -50,6 +50,11 @@ To cast from the phone emulator or the desktop app to a renderer SSDP can't reac
 - Code both apps run goes in `shared/src/androidMain`, never copied between the two modules. The release workflow builds both (`tv-module`).
 - KS Beam has no in-app updater (an internet check is an open owner question, `specs/plan-v1.md`). If one is added, the phone app asks for `UpdatePlatform.ANDROID` and the TV app for `UpdatePlatform.GOOGLE_TV`.
 
+## Releases
+- The owner's rule (2026-11-25): every feature or fix is built, tested, then committed, pushed and released, without waiting for a review or a confirmation; a tag needs no separate OK. Never commit or release while a test or CI fails.
+- A feature raises MINOR, a fix raises PATCH. One plain `vX.Y.Z` tag releases all four builds (phone, Google TV, macOS, Windows) with one version.
+- The owner's hand checks (a real TV, the Mac window, Windows) happen after the release and never block it.
+
 ## Platform folders
 - Every KS-Suite app repo has the same top-level platform folders: `tv/google-tv/`, `desktop/mac/`, `desktop/windows/`, `mobile/android/` and `mobile/ios/`. All five exist in every app repo, whether or not the app supports that platform yet.
 - This app targets `mobile/android`, `desktop/windows` and `desktop/mac` (senders) and `tv/google-tv` (the receiver). `mobile/ios` is not a target. Do not add code for a platform that is not a target without the owner asking.
