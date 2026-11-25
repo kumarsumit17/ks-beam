@@ -1,3 +1,7 @@
+# 2026-11-25
+
+* **Update**: `ks-utility` moved from `v0.6.0` to `v0.9.0` (more languages, the translation tools; [ks-utility translation tools](https://github.com/kumarsumit17/ks-utility/blob/main/specs/translating.md)).
+
 # 2026-11-24
 
 * **Update**: [Overview](overview.md) and [Receiver](receiver.md): the one Android APK is split into a phone app (`mobile/android`, the sender) and a Google TV app (`tv/google-tv`, the receiver, `-google-tv.apk`), with the same package name, version and keystore; the TV `versionCode` adds 1,000,000,000. ks-utility moved to `v0.6.0`. No one-APK bridge release came before the split: KS Beam has no in-app updater, so no installed copy picks a file by itself.
