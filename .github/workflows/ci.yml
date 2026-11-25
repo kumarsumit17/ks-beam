@@ -71,7 +71,8 @@ jobs:
           if ($msi.Count -ne 1) { Write-Error "expected one .msi, found $($msi.Count)"; exit 1 }
           $p = Start-Process msiexec -ArgumentList "/i `"$($msi[0].FullName)`" /qn /l*v install.log" -Wait -PassThru
           if ($p.ExitCode -ne 0) { Get-Content install.log -Tail 40; exit 1 }
-          $exe = Get-ChildItem -Recurse "$env:ProgramFiles\KS Beam" -Filter "KS Beam.exe" -ErrorAction SilentlyContinue
+          # Per-user install (no admin prompt): under the user's local app data; older builds used Program Files.
+          $exe = Get-ChildItem -Recurse "$env:LOCALAPPDATA\KS Beam", "$env:ProgramFiles\KS Beam" -Filter "KS Beam.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $exe) { Write-Error "KS Beam.exe was not installed"; exit 1 }
           $p = Start-Process msiexec -ArgumentList "/x `"$($msi[0].FullName)`" /qn" -Wait -PassThru
           if ($p.ExitCode -ne 0) { exit 1 }
