@@ -1,5 +1,6 @@
 # 2026-11-25
 
+* **Creation**: [Per-platform optimization plan](plan-per-platform.md) added (proposed, awaiting the owner): an audit of each build and what changes per OS, following the suite rule that each platform build is optimized for its OS. Key findings: no sender keeps the cast alive (sleep, the Android freezer, Wi-Fi power saving), no macOS Local Network text, no Windows firewall rule, no media controls outside the app.
 * **Update**: `ks-utility` moved from `v0.6.0` to `v0.9.0` (more languages, the translation tools; [ks-utility translation tools](https://github.com/kumarsumit17/ks-utility/blob/main/specs/translating.md)).
 
 # 2026-11-24

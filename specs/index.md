@@ -11,6 +11,7 @@ okf_version: "0.2"
 # Plans
 
 * [Plan to v1](plan-v1.md) - The milestones from the first DLNA sender and Google TV receiver to background receiving and screen mirroring, and what each milestone must pass.
+* [Per-platform optimization plan](plan-per-platform.md) - Proposed plan, awaiting the owner's approval, for making each KS Beam build (macOS, Windows, Android phone, Google TV) its own app tuned to its OS for look, input, networking, OS integrations, performance, packaging and accessibility.
 
 # Policies
 
