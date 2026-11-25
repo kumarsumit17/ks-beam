@@ -21,5 +21,7 @@
   "receiver.howTo": "अपने फ़ोन या कंप्यूटर पर KS Beam खोलें और {name} चुनें। DLNA से कास्ट करने वाले ऐप भी इसे ढूंढ लेते हैं।",
   "receiver.noNetwork": "पाने के लिए इस टीवी को वाई-फ़ाई या ईथरनेट से जोड़ें।",
   "receiver.cantPlay": "यह टीवी {title} नहीं चला सकता।",
+  "receiver.overApps": "जब कोई दूसरा ऐप स्क्रीन पर हो, तब भी कास्ट दिखाने के लिए KS Beam को दूसरे ऐप के ऊपर दिखने दें।",
+  "receiver.overAppsAllow": "इजाज़त दें",
   "receiver.backHint": "रोकने के लिए Back दबाएं।"
 }

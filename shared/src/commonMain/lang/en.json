@@ -21,5 +21,7 @@
   "receiver.howTo": "On your phone or computer, open KS Beam and choose {name}. Apps that cast with DLNA find it too.",
   "receiver.noNetwork": "Connect this TV to Wi-Fi or Ethernet to receive.",
   "receiver.cantPlay": "This TV can't play {title}.",
+  "receiver.overApps": "To show casts while another app is on screen, let KS Beam display over other apps.",
+  "receiver.overAppsAllow": "Allow",
   "receiver.backHint": "Press Back to stop."
 }

@@ -3,6 +3,12 @@
      and the application come from :shared. Google Play offers it to TVs only. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-feature android:name="android.software.leanback" android:required="true" />
+    <!-- The receiver keeps running in the background once KS Beam is opened (ReceiverService). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <!-- "Display over other apps", granted by the user in Settings: the only way Android lets a
+         background app bring itself forward, so a cast appears while another app is on screen. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <!-- Many TVs are on Ethernet; the Wi-Fi permissions must not make Wi-Fi a requirement. -->
     <uses-feature android:name="android.hardware.wifi" android:required="false" />
@@ -21,5 +27,9 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".ReceiverService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
     </application>
 </manifest>

@@ -23,7 +23,7 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 | `shared/src/desktopTest` | Core tests against a fake renderer and a fake SSDP responder |
 | `shared/src/jvmSharedMain/.../core/receiver` | Receiver protocol: SSDP announcer, description and control server (`specs/receiver.md`) |
 | `mobile/android/` | The phone app (`com.ks.beam`), the sender: its activity (file picker, multicast lock), `CastService` (foreground service, media notification, wake and Wi-Fi locks while casting) and launcher entry |
-| `tv/google-tv/` | The Google TV app (`com.ks.beam`, a separate APK), the receiver: Media3 playback, the ready screen, the Leanback entry and banner |
+| `tv/google-tv/` | The Google TV app (`com.ks.beam`, a separate APK), the receiver: `ReceiverService` (foreground service from app open: player, receiver, Media3 session), Media3 playback, the ready screen, the Leanback entry and banner |
 | `desktop/mac/`, `desktop/windows/` | Desktop entry points, keep-awake while casting (JNA: IOKit, kernel32) and native packaging (.dmg, .msi) |
 
 ## Constraints

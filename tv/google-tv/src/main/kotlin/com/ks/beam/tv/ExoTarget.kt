@@ -1,8 +1,11 @@
 package com.ks.beam.tv
 
 import android.content.Context
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 import android.os.Handler
 import android.os.Looper
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -24,9 +27,21 @@ sealed interface NowShowing {
  * in; every player call is posted to the main thread, and the state they read is cached here.
  * Create it on the main thread.
  */
+@OptIn(UnstableApi::class) // the frame-rate strategy
 class ExoTarget(context: Context, private val onShow: (NowShowing?) -> Unit) : PlaybackTarget {
     private val main = Handler(Looper.getMainLooper())
-    val player: ExoPlayer = ExoPlayer.Builder(context).build()
+    val player: ExoPlayer = ExoPlayer.Builder(context)
+        // A film or song for the TV: audio focus (pauses for the Assistant or another app), and
+        // ±10 s steps that match the senders' buttons.
+        .setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(), true)
+        .setSeekBackIncrementMs(SEEK_STEP_MS)
+        .setSeekForwardIncrementMs(SEEK_STEP_MS)
+        .build()
+        .apply {
+            // Match the display's refresh rate to the video only where the switch is seamless, as
+            // Google TV recommends; a blanking mode switch would interrupt the start of every cast.
+            videoChangeFrameRateStrategy = C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_ONLY_IF_SEAMLESS
+        }
 
     @Volatile private var cachedPosition = 0L
     @Volatile private var cachedDuration = 0L
@@ -133,3 +148,6 @@ class ExoTarget(context: Context, private val onShow: (NowShowing?) -> Unit) : P
         player.release()
     }
 }
+
+/** The remote's and the senders' seek step. */
+const val SEEK_STEP_MS = 10_000L

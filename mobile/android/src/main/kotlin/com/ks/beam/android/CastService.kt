@@ -113,7 +113,7 @@ class CastService : Service() {
     fun update() {
         val s = session
         val labels = s?.labels
-        val channel = labels?.channel?.ifBlank { null } ?: getString(applicationInfo.labelRes)
+        val channel = labels?.channel?.ifBlank { null } ?: applicationInfo.loadLabel(packageManager).toString()
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel(CHANNEL, channel, NotificationManager.IMPORTANCE_LOW))
 
@@ -163,7 +163,7 @@ class CastService : Service() {
             ),
         ).build()
         val notification = Notification.Builder(this, CHANNEL)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(com.ks.beam.shared.R.drawable.ic_notification)
             .setContentTitle(s?.title.orEmpty())
             .setContentText(labels?.castingTo.orEmpty())
             .setContentIntent(open)

@@ -36,11 +36,17 @@ HTTP on a random port, listening on every interface; the address announced is th
 
 ## 3. Playing (`tv/google-tv`)
 
-- Video and audio through Media3 ExoPlayer (`media3-exoplayer`, `media3-ui`, Apache-2.0), shown full screen with Media3's own controls (D-pad: OK shows them, left and right seek). Formats: MP4, MKV, WebM, MOV, MPEG-TS, AVI; MP3, AAC/M4A, FLAC, WAV, Ogg, as far as the TV's decoders allow.
-- Photos (JPEG, PNG, GIF, WebP) are downloaded (at most 40 MB) and shown fitted to the screen.
+- Video and audio through Media3 ExoPlayer (`media3-exoplayer`, `media3-ui`, Apache-2.0), shown full screen with Media3's own controls. Formats: MP4, MKV, WebM, MOV, MPEG-TS, AVI; MP3, AAC/M4A, FLAC, WAV, Ogg, as far as the TV's decoders allow.
+  - Audio focus (`USAGE_MEDIA`, movie content): the Assistant or another app pauses it.
+  - Frame-rate matching only where the switch is seamless (`VIDEO_CHANGE_FRAME_RATE_STRATEGY_ONLY_IF_SEAMLESS`), as Google TV recommends.
+  - HDR reaches the display: `PlayerView` keeps its default `SurfaceView`. AC-3, E-AC-3 and DTS passthrough are ExoPlayer's own (`AudioCapabilities`); both are checked on a real TV, not on the emulator.
+- **Remote:** with the controls hidden, left and right seek 10 s a press and 30 s steps while held; OK shows the controls, which hide after 3 s; with them shown the D-pad moves between them (the seek bar steps 10 s).
+- **Media session** (`media3-session`): the remote's play/pause keys, Google Assistant and the TV's now-playing card reach the player.
+- Photos (JPEG, PNG, GIF, WebP) are downloaded (at most 40 MB), decoded no larger than the display's real resolution (a 4K TV gets 4K), turned upright from their EXIF orientation, and shown fitted to the screen with the file name as their description.
 - A file the TV can't play shows "This TV can't play …" instead of a blank screen.
 - **Back** stops what is showing and returns to the ready screen. The ready screen shows the name to pick and the language button (D-pad focusable).
-- The receiver runs while KS Beam is open on the TV (`onStart` to `onStop`). Receiving in the background is a later step.
+- **Receiving in the background** (the owner's choice): opening KS Beam starts `ReceiverService`, a `connectedDevice` foreground service that owns the player, the receiver and the session, and keeps receiving after KS Beam closes, until the TV restarts or the system ends it. It does not start at boot.
+- A cast that arrives while another app is on screen brings KS Beam forward, which Android allows only with **"Display over other apps"** (`SYSTEM_ALERT_WINDOW`). Without it the ready screen shows a line and an "Allow" button that opens that setting, and a video cast in the background waits paused (the sender shows paused) until KS Beam is opened; a song plays. When KS Beam leaves the screen during a video, the video pauses.
 
 ## Limits
 
