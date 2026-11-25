@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.ks.beam.core.Cast
 import com.ks.beam.core.DeviceDescription
+import com.ks.beam.core.MediaSource
 import com.ks.beam.core.Mime
 import com.ks.beam.core.Position
 import com.ks.beam.core.Renderer
@@ -29,12 +30,24 @@ sealed interface BeamError {
 class BeamState(private val platform: BeamPlatform, private val scope: CoroutineScope) {
     var renderers by mutableStateOf(emptyList<Renderer>()); private set
     var searching by mutableStateOf(false); private set
-    var selected by mutableStateOf<Renderer?>(null)
+    private var chosen by mutableStateOf<Renderer?>(null)
+    /** The renderer to cast to. Choosing one casts a file that is waiting for it ([pendingMedia]). */
+    var selected: Renderer?
+        get() = chosen
+        set(value) {
+            chosen = value
+            val waiting = pendingMedia
+            if (value != null && waiting != null) castMedia(waiting)
+        }
+    /** A file given before any renderer was chosen (dropped, or opened with KS Beam): cast once one is. */
+    var pendingMedia by mutableStateOf<MediaSource?>(null); private set
     var cast by mutableStateOf<Cast?>(null); private set
     var starting by mutableStateOf(false); private set
     var playing by mutableStateOf(false); private set
     var position by mutableStateOf(Position(0, 0)); private set
     var error by mutableStateOf<BeamError?>(null)
+    /** Show the Windows firewall explanation when no TV is found. */
+    val explainFirewall: Boolean get() = platform.explainFirewall
 
     var languageChoice by mutableStateOf(platform.settings.languageChoice()); private set
     val language: String get() = resolveLanguage(languageChoice, platform.systemLanguages)
@@ -89,13 +102,25 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
     }
 
     fun chooseFileAndCast() {
-        val renderer = selected ?: return
+        scope.launch { platform.pickMedia()?.let(::castMedia) }
+    }
+
+    /**
+     * Casts [media] to the chosen renderer: from the file picker, a file dropped on the window, or
+     * one opened with KS Beam. With no renderer chosen yet it waits in [pendingMedia].
+     */
+    fun castMedia(media: MediaSource) {
+        if (!Mime.isSupported(media.mimeType)) {
+            error = BeamError.Unsupported
+            return
+        }
+        val renderer = selected
+        if (renderer == null) {
+            pendingMedia = media
+            return
+        }
+        pendingMedia = null
         scope.launch {
-            val media = platform.pickMedia() ?: return@launch
-            if (!Mime.isSupported(media.mimeType)) {
-                error = BeamError.Unsupported
-                return@launch
-            }
             stop()
             error = null
             starting = true
@@ -141,16 +166,24 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
         control { it.seek(target) }
     }
 
-    fun stop() {
+    fun stop() { stopCast() }
+
+    /**
+     * Stops the cast and waits up to [waitMs] for the TV to be told, for when the app is quitting:
+     * the process would otherwise end before the TV hears "stop" and keep reading a closed server.
+     */
+    fun stopBeforeExit(waitMs: Long = 2000) { stopCast()?.join(waitMs) }
+
+    private fun stopCast(): Thread? {
         poll?.cancel()
         poll = null
         lock?.close()
         lock = null
-        val c = cast ?: return
+        val c = cast ?: return null
         cast = null
         playing = false
         // Not on [scope]: stop() also runs while the interface's scope is being cancelled.
-        Thread({ runCatching { c.close() } }, "ks-beam-stop").start()
+        return Thread({ runCatching { c.close() } }, "ks-beam-stop").apply { start() }
     }
 
     private fun control(action: (Cast) -> Unit) {

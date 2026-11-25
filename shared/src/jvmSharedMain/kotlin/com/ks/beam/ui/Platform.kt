@@ -26,6 +26,12 @@ interface BeamPlatform {
      */
     val extraRenderers: List<String> get() = emptyList()
 
+    /**
+     * True on Windows: when no TV is found, the interface explains Windows Defender Firewall's
+     * prompt (the owner's choice: no firewall rule is added at install).
+     */
+    val explainFirewall: Boolean get() = false
+
     /** Held while searching (Android: a Wi-Fi multicast lock). */
     fun searchLock(): AutoCloseable = AutoCloseable {}
 

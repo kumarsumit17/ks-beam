@@ -24,13 +24,13 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 | `shared/src/jvmSharedMain/.../core/receiver` | Receiver protocol: SSDP announcer, description and control server (`specs/receiver.md`) |
 | `mobile/android/` | The phone app (`com.ks.beam`), the sender: its activity (file picker, multicast lock), `CastService` (foreground service, media notification, wake and Wi-Fi locks while casting) and launcher entry |
 | `tv/google-tv/` | The Google TV app (`com.ks.beam`, a separate APK), the receiver: `ReceiverService` (foreground service from app open: player, receiver, Media3 session), Media3 playback, the ready screen, the Leanback entry and banner |
-| `desktop/mac/`, `desktop/windows/` | Desktop entry points, keep-awake while casting (JNA: IOKit, kernel32) and native packaging (.dmg, .msi) |
+| `desktop/mac/`, `desktop/windows/` | Desktop entry points (`DesktopOptions`: menus, title bar, Open With, single instance on Windows), keep-awake while casting (JNA: IOKit, kernel32) and native packaging (.dmg, .msi) |
 
 ## Constraints
 - Local network only; the file server answers only the file being cast, at a random-token address (`specs/constraints.md`).
 - A running cast holds the platform's cast lock (`BeamPlatform.castLock`): the sender is the TV's file server, so it must not sleep or be frozen (`specs/casting.md`, section 2).
 - The core stays dependency-free JVM code: `java.net`, `HttpURLConnection`, the platform XML parser (DOCTYPEs refused).
-- Desktop keyboard: space play/pause, arrows seek (to add with milestone 2) must match TV remotes once the receiver exists.
+- Sender keys (`BeamState.handleKey`): Space plays or pauses, left and right seek 10 s, Esc stops, matching the TV remote; macOS adds its menu bar (⌘O, ⌘.), Windows adds Ctrl+O.
 
 ## Commands
 ```bash

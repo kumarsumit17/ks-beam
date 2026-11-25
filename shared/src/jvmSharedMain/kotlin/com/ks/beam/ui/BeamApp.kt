@@ -33,6 +33,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import com.ks.beam.resources.devices_firewall
+import com.ks.beam.resources.cast_pending
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.Key
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -89,10 +101,16 @@ private val BeamColors = darkColorScheme(
 )
 
 /** The whole interface, shared by Android, Windows and macOS. */
+/**
+ * The sender's interface. Desktop entry points create [state] themselves so the window's menus and
+ * keys reach it; [contentPadding] keeps content clear of a macOS title bar drawn over the window.
+ */
 @Composable
-fun BeamApp(platform: BeamPlatform) {
-    val scope = rememberCoroutineScope()
-    val state = remember { BeamState(platform, scope) }
+fun BeamApp(
+    platform: BeamPlatform,
+    state: BeamState = rememberBeamState(platform),
+    contentPadding: PaddingValues = PaddingValues(),
+) {
     LaunchedEffect(Unit) { state.search() }
     // The cast ends with the interface (window closed, app swiped away), releasing its lock.
     DisposableEffect(state) { onDispose { state.stop() } }
@@ -111,18 +129,56 @@ fun BeamApp(platform: BeamPlatform) {
             )
             SideEffect { state.labels = labels }
             Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                Box(Modifier.fillMaxSize().safeDrawingPadding(), contentAlignment = Alignment.TopCenter) {
-                    Column(Modifier.widthIn(max = 720.dp).fillMaxSize().padding(20.dp)) {
+                BoxWithConstraints(
+                    Modifier.fillMaxSize().safeDrawingPadding().padding(contentPadding),
+                    contentAlignment = Alignment.TopCenter,
+                ) {
+                    val cast = state.cast
+                    // A wide window (a desktop, a tablet) keeps the TVs beside the cast controls.
+                    val twoPanes = maxWidth >= 840.dp && cast != null
+                    Column(Modifier.widthIn(max = if (twoPanes) 1200.dp else 720.dp).fillMaxSize().padding(20.dp)) {
                         Header(state)
                         Spacer(Modifier.height(16.dp))
                         state.error?.let { ErrorBanner(it) { state.error = null } }
-                        val cast = state.cast
-                        if (cast != null) CastPanel(state, cast.renderer, cast.media.name) else DevicePanel(state)
+                        if (twoPanes && cast != null) {
+                            Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+                                Column(Modifier.weight(1f)) { DevicePanel(state) }
+                                Column(Modifier.weight(1f)) { CastPanel(state, cast.renderer, cast.media.name) }
+                            }
+                        } else if (cast != null) {
+                            CastPanel(state, cast.renderer, cast.media.name)
+                        } else {
+                            DevicePanel(state)
+                        }
                     }
                 }
             }
         }
     }
+}
+
+/** The interface's state, kept for as long as the composition. */
+@Composable
+fun rememberBeamState(platform: BeamPlatform): BeamState {
+    val scope = rememberCoroutineScope()
+    return remember { BeamState(platform, scope) }
+}
+
+/**
+ * The keys every sender shares, matching the TV remote ([Constraints](specs/constraints.md)):
+ * Space plays or pauses, left and right seek 10 s, Esc stops. Only while casting.
+ */
+fun BeamState.handleKey(event: KeyEvent): Boolean {
+    if (cast == null || event.type != KeyEventType.KeyDown) return false
+    if (event.isCtrlPressed || event.isMetaPressed || event.isAltPressed) return false
+    when (event.key) {
+        Key.Spacebar -> togglePlay()
+        Key.DirectionLeft -> seekBy(-10)
+        Key.DirectionRight -> seekBy(10)
+        Key.Escape -> stop()
+        else -> return false
+    }
+    return true
 }
 
 @Composable
@@ -177,12 +233,19 @@ private fun ColumnScope.DevicePanel(state: BeamState) {
     }
     if (message != null) {
         Text(message, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 12.dp))
+        if (!state.searching && state.explainFirewall) {
+            Text(stringResource(Res.string.devices_firewall), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 12.dp))
+        }
     }
     LazyColumn(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items(state.renderers, key = { it.id }) { r -> DeviceRow(r, r.id == state.selected?.id) { state.selected = r } }
     }
     Spacer(Modifier.height(16.dp))
-    if (state.renderers.isNotEmpty() && state.selected == null) {
+    val waiting = state.pendingMedia
+    if (waiting != null) {
+        Text(stringResource(Res.string.cast_pending, waiting.name), color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+    } else if (state.renderers.isNotEmpty() && state.selected == null) {
         Text(stringResource(Res.string.devices_choose), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(8.dp))
     }

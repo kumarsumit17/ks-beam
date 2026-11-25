@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
     implementation(libs.jna)
+    implementation(libs.compose.resources) // the menu bar's text, from the shared language files
     testImplementation(kotlin("test"))
 }
 
@@ -34,10 +35,33 @@ compose.desktop {
                 bundleID = "com.ks.beam"
                 appCategory = "public.app-category.utilities"
                 // macOS 15+ asks before an app reaches the local network; this is the reason shown.
+                // The document types put KS Beam in Finder's "Open With" for the formats it casts, as
+                // an alternative only (LSHandlerRank Alternate): it never becomes the default app.
                 infoPlist {
                     extraKeysRawXml = """
                         <key>NSLocalNetworkUsageDescription</key>
                         <string>KS Beam finds TVs and projectors on your network and sends them the file you choose.</string>
+                        <key>CFBundleDocumentTypes</key>
+                        <array>
+                        <dict>
+                            <key>CFBundleTypeName</key><string>Video</string>
+                            <key>CFBundleTypeRole</key><string>Viewer</string>
+                            <key>LSHandlerRank</key><string>Alternate</string>
+                            <key>CFBundleTypeExtensions</key><array><string>mp4</string><string>m4v</string><string>mkv</string><string>webm</string><string>mov</string><string>avi</string><string>ts</string></array>
+                        </dict>
+                        <dict>
+                            <key>CFBundleTypeName</key><string>Audio</string>
+                            <key>CFBundleTypeRole</key><string>Viewer</string>
+                            <key>LSHandlerRank</key><string>Alternate</string>
+                            <key>CFBundleTypeExtensions</key><array><string>mp3</string><string>m4a</string><string>aac</string><string>flac</string><string>wav</string><string>ogg</string></array>
+                        </dict>
+                        <dict>
+                            <key>CFBundleTypeName</key><string>Photo</string>
+                            <key>CFBundleTypeRole</key><string>Viewer</string>
+                            <key>LSHandlerRank</key><string>Alternate</string>
+                            <key>CFBundleTypeExtensions</key><array><string>jpg</string><string>jpeg</string><string>png</string><string>gif</string><string>webp</string></array>
+                        </dict>
+                        </array>
                     """.trimIndent()
                 }
             }

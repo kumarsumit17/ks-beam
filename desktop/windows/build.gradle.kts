@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
     implementation(libs.jna)
+    testImplementation(kotlin("test"))
 }
 
 // jpackage needs MAJOR >= 1; untagged development builds package as 1.0.0.
@@ -32,6 +33,10 @@ compose.desktop {
             windows {
                 menu = true
                 menuGroup = "KS-Suite"
+                // No admin prompt (the owner's choice: no firewall rule at install; the app explains
+                // Windows' own prompt). No file associations: they would make KS Beam the default
+                // app for videos and photos; drag a file onto the window instead.
+                perUserInstall = true
                 shortcut = true
                 dirChooser = true
                 // Fixed for the life of the app, so new versions upgrade the installed one.

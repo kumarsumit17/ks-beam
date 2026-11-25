@@ -74,4 +74,31 @@ class CastLockTest {
             }
         }
     }
+
+    @Test fun aFileGivenBeforeATvIsChosenWaitsThenCasts() {
+        FakeRenderer().use { tv ->
+            val platform = TestPlatform()
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            try {
+                val state = BeamState(platform, scope)
+                state.castMedia(BytesMedia("dropped.mp4", ByteArray(4096)))
+                assertEquals("dropped.mp4", state.pendingMedia?.name)
+                assertEquals(null, state.cast)
+                state.selected = assertNotNull(DeviceDescription.fetch(tv.location))
+                assertTrue(waitFor { state.cast != null }, "the waiting file was not cast: ${state.error}")
+                assertEquals("dropped.mp4", state.cast?.media?.name)
+                assertEquals(null, state.pendingMedia)
+                state.stop()
+            } finally {
+                scope.cancel()
+            }
+        }
+    }
+
+    @Test fun anUnsupportedFileIsRefused() {
+        val state = BeamState(TestPlatform(), CoroutineScope(Dispatchers.Default))
+        state.castMedia(BytesMedia("notes.txt", ByteArray(10), mimeType = "text/plain"))
+        assertEquals(BeamError.Unsupported, state.error)
+        assertEquals(null, state.pendingMedia)
+    }
 }
