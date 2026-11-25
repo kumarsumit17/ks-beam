@@ -33,6 +33,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +51,7 @@ import com.ks.beam.core.AvTransport
 import com.ks.beam.core.Renderer
 import com.ks.beam.resources.Res
 import com.ks.beam.resources.app_name
+import com.ks.beam.resources.cast_channel
 import com.ks.beam.resources.cast_choose_file
 import com.ks.beam.resources.cast_play
 import com.ks.beam.resources.cast_seek_back
@@ -91,9 +94,22 @@ fun BeamApp(platform: BeamPlatform) {
     val scope = rememberCoroutineScope()
     val state = remember { BeamState(platform, scope) }
     LaunchedEffect(Unit) { state.search() }
+    // The cast ends with the interface (window closed, app swiped away), releasing its lock.
+    DisposableEffect(state) { onDispose { state.stop() } }
 
     MaterialTheme(colorScheme = BeamColors) {
         platform.ProvideLanguage(state.language) {
+            // The OS's media controls (Android notification) show these, in the chosen language.
+            val labels = CastLabels(
+                castingTo = stringResource(Res.string.cast_to, state.cast?.renderer?.name.orEmpty()),
+                play = stringResource(Res.string.cast_play),
+                pause = stringResource(Res.string.common_pause),
+                back = stringResource(Res.string.cast_seek_back),
+                forward = stringResource(Res.string.cast_seek_forward),
+                stop = stringResource(Res.string.cast_stop),
+                channel = stringResource(Res.string.cast_channel),
+            )
+            SideEffect { state.labels = labels }
             Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                 Box(Modifier.fillMaxSize().safeDrawingPadding(), contentAlignment = Alignment.TopCenter) {
                     Column(Modifier.widthIn(max = 720.dp).fillMaxSize().padding(20.dp)) {

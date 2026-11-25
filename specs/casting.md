@@ -22,6 +22,11 @@ Code: `shared/src/jvmSharedMain/kotlin/com/ks/beam/core/`. Standards: UPnP Devic
 - Each file gets an address `/m/<token>/<name>`, where `<token>` is 128 random bits. Only registered tokens are answered; anything else gets `404`. Only `GET` and `HEAD` are accepted.
 - `Range: bytes=a-b`, `a-` and `-n` are supported (`206`, `Content-Range`); an unsatisfiable range gets `416`. Every response has `Accept-Ranges: bytes`, `Content-Length`, the file's MIME type, `transferMode.dlna.org: Streaming` and `contentFeatures.dlna.org` with `DLNA.ORG_OP=01` (byte seeking).
 - The server is stopped when casting stops or the app closes; files are read in place, never copied.
+- **While a cast runs the server must stay reachable**, so each sender takes a cast lock (`BeamPlatform.castLock`) from the start of the cast to its end ([Per-platform plan](plan-per-platform.md), step 2):
+  - Android phone: `CastService`, a `connectedDevice` foreground service (the process is never frozen), a partial wake lock (capped at 6 hours) and Wi-Fi locks. Its media notification and a platform `MediaSession`, marked as remote playback, give the lock screen and quick settings play/pause, ±10 s, the seek bar and stop. Headset and keyboard media keys do not reach it: Android sends them only to an app playing audio on the phone.
+  - macOS: an IOKit power assertion (`PreventUserIdleSystemSleep`); the display may sleep.
+  - Windows: `SetThreadExecutionState(ES_SYSTEM_REQUIRED)` on a thread held for the cast.
+  - The cast ends when the interface goes (window closed, app swiped away), which releases the lock.
 
 ## 3. Play (`AvTransport`)
 

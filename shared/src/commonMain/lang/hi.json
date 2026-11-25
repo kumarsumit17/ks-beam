@@ -9,6 +9,7 @@
   "cast.unsupported": "KS Beam इस तरह की फ़ाइल कास्ट नहीं कर सकता। कोई वीडियो, गाना या फ़ोटो चुनें।",
   "cast.to": "{device} पर कास्ट हो रहा है",
   "cast.starting": "टीवी पर शुरू हो रहा है…",
+  "cast.channel": "कास्ट करना",
   "cast.play": "चलाएं",
   "cast.stop": "कास्ट करना बंद करें",
   "cast.seekBack": "10 सेकंड पीछे",

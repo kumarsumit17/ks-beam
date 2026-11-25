@@ -9,6 +9,7 @@
   "cast.unsupported": "KS Beam can't cast this kind of file. Choose a video, a music file or a photo.",
   "cast.to": "Casting to {device}",
   "cast.starting": "Starting on the TV…",
+  "cast.channel": "Casting",
   "cast.play": "Play",
   "cast.stop": "Stop casting",
   "cast.seekBack": "Back 10 seconds",

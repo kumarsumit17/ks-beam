@@ -12,6 +12,7 @@ kotlin { jvmToolchain(17) }
 dependencies {
     implementation(project(":shared"))
     implementation(compose.desktop.currentOs)
+    implementation(libs.jna)
 }
 
 // jpackage needs MAJOR >= 1; untagged development builds package as 1.0.0.

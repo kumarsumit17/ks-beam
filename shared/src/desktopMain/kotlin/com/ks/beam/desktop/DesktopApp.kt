@@ -12,6 +12,8 @@ import com.ks.beam.core.MediaSource
 import com.ks.beam.core.Mime
 import com.ks.beam.ui.BeamApp
 import com.ks.beam.ui.BeamPlatform
+import com.ks.beam.ui.CastLock
+import com.ks.beam.ui.CastSession
 import com.ks.beam.ui.SettingsStore
 import java.awt.FileDialog
 import java.awt.Frame
@@ -39,8 +41,12 @@ private class PrefsSettings : SettingsStore {
     }
 }
 
-private class DesktopPlatform(override val systemLanguages: List<String>) : BeamPlatform {
+private class DesktopPlatform(
+    override val systemLanguages: List<String>,
+    private val keepAwake: () -> AutoCloseable,
+) : BeamPlatform {
     override val settings: SettingsStore = PrefsSettings()
+    override val extraRenderers: List<String> = listOfNotNull(System.getenv("KS_BEAM_RENDERER")?.takeIf { it.isNotBlank() })
     var window: Frame? = null
 
     override suspend fun pickMedia(): MediaSource? {
@@ -52,6 +58,14 @@ private class DesktopPlatform(override val systemLanguages: List<String>) : Beam
         return FileMediaSource(file)
     }
 
+    // While a cast runs this computer is the TV's file server: the OS must not sleep.
+    override fun castLock(session: CastSession): CastLock {
+        val awake = keepAwake()
+        return object : CastLock {
+            override fun close() = awake.close()
+        }
+    }
+
     @Composable
     override fun ProvideLanguage(language: String, content: @Composable () -> Unit) {
         // Compose resources follow the JVM's default locale on desktop; key() rebuilds the subtree
@@ -61,9 +75,12 @@ private class DesktopPlatform(override val systemLanguages: List<String>) : Beam
     }
 }
 
-/** Starts the desktop app. [systemLanguages]: the OS's preferred languages, most preferred first. */
-fun runDesktopApp(systemLanguages: List<String>) {
-    val platform = DesktopPlatform(systemLanguages)
+/**
+ * Starts the desktop app. [systemLanguages]: the OS's preferred languages, most preferred first.
+ * [keepAwake]: keeps the OS from sleeping until closed (each OS's own call, in its platform folder).
+ */
+fun runDesktopApp(systemLanguages: List<String>, keepAwake: () -> AutoCloseable = { AutoCloseable {} }) {
+    val platform = DesktopPlatform(systemLanguages, keepAwake)
     application {
         Window(
             onCloseRequest = ::exitApplication,

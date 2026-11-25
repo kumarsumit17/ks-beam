@@ -2,6 +2,12 @@
 <!-- The phone app: the sender. Permissions and the application come from :shared; a separate
      Google TV app (tv/google-tv, the receiver) has the same package name. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- While a cast runs the phone is the TV's file server (CastService): a foreground service
+         with media controls, a wake lock and Wi-Fi locks keep it reachable with the screen off. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application>
         <activity
             android:name=".MainActivity"
@@ -13,5 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".CastService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
     </application>
 </manifest>

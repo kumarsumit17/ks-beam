@@ -22,12 +22,13 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 | `shared/src/androidMain` | What both Android apps share: the manifest (permissions, name, icon, languages, network rules), content-URI files, settings and language |
 | `shared/src/desktopTest` | Core tests against a fake renderer and a fake SSDP responder |
 | `shared/src/jvmSharedMain/.../core/receiver` | Receiver protocol: SSDP announcer, description and control server (`specs/receiver.md`) |
-| `mobile/android/` | The phone app (`com.ks.beam`), the sender: its activity (file picker, multicast lock) and launcher entry |
+| `mobile/android/` | The phone app (`com.ks.beam`), the sender: its activity (file picker, multicast lock), `CastService` (foreground service, media notification, wake and Wi-Fi locks while casting) and launcher entry |
 | `tv/google-tv/` | The Google TV app (`com.ks.beam`, a separate APK), the receiver: Media3 playback, the ready screen, the Leanback entry and banner |
-| `desktop/mac/`, `desktop/windows/` | Desktop entry points and native packaging (.dmg, .msi) |
+| `desktop/mac/`, `desktop/windows/` | Desktop entry points, keep-awake while casting (JNA: IOKit, kernel32) and native packaging (.dmg, .msi) |
 
 ## Constraints
 - Local network only; the file server answers only the file being cast, at a random-token address (`specs/constraints.md`).
+- A running cast holds the platform's cast lock (`BeamPlatform.castLock`): the sender is the TV's file server, so it must not sleep or be frozen (`specs/casting.md`, section 2).
 - The core stays dependency-free JVM code: `java.net`, `HttpURLConnection`, the platform XML parser (DOCTYPEs refused).
 - Desktop keyboard: space play/pause, arrows seek (to add with milestone 2) must match TV remotes once the receiver exists.
 
@@ -41,6 +42,7 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 ./gradlew :desktop:mac:packageReleaseDmg      # .dmg; needs a non-Homebrew JDK (e.g. Corretto) or CI
 ```
 Emulators are behind their own NAT and can't be discovered. Test the receiver on the TV emulator by forwarding its port and casting from the Mac: `adb forward tcp:49152 tcp:<port from logcat "receiver ready at">`, then `KS_BEAM_RENDERER=http://127.0.0.1:49152/desc.xml KS_BEAM_MEDIA=<file.mp4> KS_BEAM_MEDIA_HOST=10.0.2.2 ./gradlew :shared:desktopTest --tests '*EmulatorCastTest*'`. Emulators: the workspace's `scripts/emulators.sh` and `specs/testing.md`.
+To cast from the phone emulator or the desktop app to a renderer SSDP can't reach, name its description: `adb shell am start -n com.ks.beam/.android.MainActivity --es ks.beam.renderer http://10.0.2.2:49152/desc.xml` (debug builds only), or `KS_BEAM_RENDERER=<url>` for the desktop app.
 
 ## Phone and Google TV apps
 - Two Android apps since v1.1.0 (the suite rule "Phone and Google TV builds" in the workspace's `specs/platform-folders.md`): the phone app (`mobile/android`, `ks-beam-v<version>.apk`) is always the sender, and the Google TV app (`tv/google-tv`, `ks-beam-v<version>-google-tv.apk`) is always the receiver. The role comes from the app, never from the device.

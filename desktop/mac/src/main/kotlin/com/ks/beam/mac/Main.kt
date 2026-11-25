@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 fun main() {
     System.setProperty("apple.laf.useScreenMenuBar", "true")
     System.setProperty("apple.awt.application.name", "KS Beam")
-    runDesktopApp(preferredLanguages())
+    runDesktopApp(preferredLanguages()) { keepAwake("KS Beam is casting to a TV") }
 }
 
 /** The user's preferred languages (AppleLanguages), most preferred first. */

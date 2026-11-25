@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.ks.beam.core.Cast
+import com.ks.beam.core.DeviceDescription
 import com.ks.beam.core.Mime
 import com.ks.beam.core.Position
 import com.ks.beam.core.Renderer
@@ -39,6 +40,27 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
     val language: String get() = resolveLanguage(languageChoice, platform.systemLanguages)
 
     private var poll: Job? = null
+    private var lock: CastLock? = null
+
+    /** The control labels for OS media controls, set by the interface in its language. */
+    var labels: CastLabels = CastLabels()
+        set(value) {
+            if (field == value) return
+            field = value
+            lock?.changed()
+        }
+
+    private val session = object : CastSession {
+        override val rendererName get() = cast?.renderer?.name.orEmpty()
+        override val title get() = cast?.media?.name.orEmpty()
+        override val playing get() = this@BeamState.playing
+        override val position get() = this@BeamState.position
+        override val labels get() = this@BeamState.labels
+        override fun togglePlay() = this@BeamState.togglePlay()
+        override fun seekBy(delta: Long) = this@BeamState.seekBy(delta)
+        override fun seekTo(seconds: Long) = this@BeamState.seekTo(seconds)
+        override fun stop() = this@BeamState.stop()
+    }
 
     fun chooseLanguage(choice: LanguageChoice) {
         languageChoice = choice
@@ -52,9 +74,9 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
             val found = mutableListOf<Renderer>()
             try {
                 withContext(Dispatchers.IO) {
-                    platform.searchLock().use {
-                        RendererFinder().find { r -> scope.launch { found += r; renderers = mergeRenderers(renderers, r) } }
-                    }
+                    val report = { r: Renderer -> scope.launch { found += r; renderers = mergeRenderers(renderers, r) }; Unit }
+                    platform.extraRenderers.forEach { location -> DeviceDescription.fetch(location)?.let(report) }
+                    platform.searchLock().use { RendererFinder().find(onFound = report) }
                 }
             } finally {
                 searching = false
@@ -89,6 +111,7 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
                 cast = started
                 playing = true
                 position = Position(0, 0)
+                lock = platform.castLock(session)
                 startPolling(started)
             } catch (e: UpnpException) {
                 error = if (e.code == 714) BeamError.Format(e.code) else BeamError.Refused(e.code)
@@ -100,7 +123,13 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
         }
     }
 
-    fun togglePlay() = control { c -> if (playing) c.pause() else c.play(); playing = !playing }
+    fun togglePlay() {
+        if (cast == null) return
+        playing = !playing
+        lock?.changed()
+        val play = playing
+        control { c -> if (play) c.play() else c.pause() }
+    }
 
     fun seekBy(delta: Long) = seekTo(position.seconds + delta)
 
@@ -108,16 +137,20 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
         val max = position.durationSeconds.takeIf { it > 0 } ?: Long.MAX_VALUE
         val target = seconds.coerceIn(0, max)
         position = position.copy(seconds = target)
+        lock?.changed()
         control { it.seek(target) }
     }
 
     fun stop() {
         poll?.cancel()
         poll = null
+        lock?.close()
+        lock = null
         val c = cast ?: return
         cast = null
         playing = false
-        scope.launch(Dispatchers.IO) { c.close() }
+        // Not on [scope]: stop() also runs while the interface's scope is being cancelled.
+        Thread({ runCatching { c.close() } }, "ks-beam-stop").start()
     }
 
     private fun control(action: (Cast) -> Unit) {
@@ -148,6 +181,7 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
                         // Finished, or stopped from the TV's own remote.
                         "STOPPED", "NO_MEDIA_PRESENT" -> if (p.seconds == 0L) playing = false
                     }
+                    lock?.changed()
                 }.onFailure {
                     if (++failures >= 5) error = BeamError.NoResponse
                 }
