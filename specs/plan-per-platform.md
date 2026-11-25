@@ -1,13 +1,13 @@
 ---
 type: Plan
 title: Per-platform optimization plan
-description: Proposed plan, awaiting the owner's approval, for making each KS Beam build (macOS, Windows, Android phone, Google TV) its own app tuned to its OS for look, input, networking, OS integrations, performance, packaging and accessibility.
+description: Approved plan for making each KS Beam build (macOS, Windows, Android phone, Google TV) its own app tuned to its OS for look, input, networking, OS integrations, performance, packaging and accessibility.
 tags: [plan, platforms, macos, windows, android, google-tv, accessibility, performance]
 ---
 
 # Per-platform optimization plan
 
-**Status: proposed on 2026-11-25, waiting for the owner's approval.** Nothing in section 4 is built before the owner approves it and answers section 3.
+**Status: approved by the owner on 2026-11-25.** The decisions in section 3 are asked when the step that needs them starts. Built steps are marked in section 4.
 
 Goal: each build is the best casting app on its platform, as the suite rule "Each platform build is optimized for its OS" asks (KS-Suite [platform folders](https://github.com/kumarsumit17/KS-Suite/blob/main/specs/platform-folders.md)), not one lowest-common-denominator build. The casting core and the receiver protocol stay in `shared/src/jvmSharedMain` (dependency-free JVM code, [Constraints](constraints.md)), and the sender interface stays shared. What differs per OS goes in that platform's folder, or in `shared/src/androidMain` / `shared/src/desktopMain` when two builds need it.
 
