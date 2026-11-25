@@ -96,7 +96,7 @@ Each item names its folder. A "new dependency" is reported as [Dependencies](dep
 
 ## 3. Decisions for the owner
 
-1. **Own version per platform: settled by the suite rule (KS-Suite `dev` 25e10b6).** One plain `vX.Y.Z` tag releases all four builds with one version; platform tags and bridge releases are not used for now. Each build is still optimized for its own platform; this plan covers only the optimizations.
+1. **Own version per platform: platform tags (the suite rule, KS-Suite `dev` d373527, replacing the one-version rule of the same day).** `android-vX.Y.Z`, `google-tv-vX.Y.Z`, `mac-vX.Y.Z` or `windows-vX.Y.Z` releases only that platform with its own version; a plain `vX.Y.Z` still releases all four. KS Beam has no in-app updater, so it needed no bridge release.
 2. **Receiver in the background on Google TV**: (a) a foreground service started when the app is opened, kept until the TV restarts; (b) also started at boot (`RECEIVE_BOOT_COMPLETED`), so the TV is always ready to receive; or (c) as today, only while KS Beam is on screen.
 3. **Windows firewall rule at install**: (a) the msi adds the private-network rule (needs a per-machine install and the admin prompt), or (b) a per-user install, and the app explains Windows' own prompt on first use.
 4. **New dependencies**: JNA on the desktops (for the keep-awake calls, the macOS media keys and Now Playing, and the Windows dark title bar), or no JNA: keep-awake through `caffeinate` on macOS and the Windows items without native calls, with no media keys on desktop. And `androidx.media3:media3-session` for the TV receiver's media session; the phone uses the platform `MediaSession` and needs nothing new.
@@ -107,7 +107,7 @@ Each step is one or more commits on `dev`, tested on its platform before the nex
 
 | Step | What | Where | Tested on |
 |---|---|---|---|
-| 1 | ~~Versioning per platform~~: dropped, one version for all builds (decision 1) | n/a | n/a |
+| 1 ✅ | **Built 2026-11-25.** Versioning per platform: ks-utility `v0.10.1`; `release.yml` runs on the four platform tags and the plain tag, and a rehearsal takes a platform. Local builds read the number after the tag's `v`. | `.github/workflows/release.yml`, `build.gradle.kts` | A Google TV rehearsal (1.2.1) built only the TV APK and AAB, signed with the suite key |
 | 2 ✅ | **Built 2026-11-25** ([Casting](casting.md), section 2). Keep the cast alive on every sender: `castLock`, Android foreground service, Wi-Fi lock, notification and media session; macOS and Windows keep-awake; macOS Local Network text; Android 17 local-network check | `shared/`, `mobile/android`, `desktop/*` | Phone emulator (cast continues with the screen off, measured against the TV emulator through the Mac); this Mac with the display asleep; Windows by the owner |
 | 3 ✅ | **Built 2026-11-25** ([Receiver](receiver.md), section 3). Google TV receiver: foreground service (decision 2), frame-rate matching, audio focus and passthrough, HDR check, photos, media session | `tv/google-tv` | Every TV emulator 32–100 inch (`scripts/emulators.sh`), cast from the Mac; the owner's TV for passthrough, HDR and frame rate |
 | 4 ✅ | **Built 2026-11-25.** Desktop look and input: two-pane layout, keyboard map, menus, drag and drop, Open With, file associations, Windows network choice and firewall | `shared/`, `desktop/mac`, `desktop/windows` | This Mac (`:desktop:mac:run`, the dmg); Windows CI build and the owner's hand check |

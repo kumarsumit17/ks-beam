@@ -52,7 +52,7 @@ To cast from the phone emulator or the desktop app to a renderer SSDP can't reac
 
 ## Releases
 - The owner's rule (2026-11-25): every feature or fix is built, tested, then committed, pushed and released, without waiting for a review or a confirmation; a tag needs no separate OK. Never commit or release while a test or CI fails.
-- A feature raises MINOR, a fix raises PATCH. One plain `vX.Y.Z` tag releases all four builds (phone, Google TV, macOS, Windows) with one version.
+- A feature raises MINOR, a fix raises PATCH. Each platform has its own version: `android-vX.Y.Z` (phone app), `google-tv-vX.Y.Z` (TV app), `mac-vX.Y.Z`, `windows-vX.Y.Z` release only that build; a plain `vX.Y.Z` releases all four. A platform's next version is higher than both its own last tag and the last plain tag (KS-Suite `specs/versioning-signing.md`, "Platform tags"). KS Beam has no updater, so no bridge release.
 - The owner's hand checks (a real TV, the Mac window, Windows) happen after the release and never block it.
 
 ## Platform folders
