@@ -205,7 +205,7 @@ class RendererServer(
 <deviceType>$DEVICE_TYPE</deviceType>
 <friendlyName>${xmlEscape(friendlyName)}</friendlyName>
 <manufacturer>KS-Suite</manufacturer>
-<manufacturerURL>https://github.com/kumarsumit17/ks-beam</manufacturerURL>
+<manufacturerURL>https://github.com/kumasumit/ks-beam</manufacturerURL>
 <modelName>KS Beam</modelName>
 <modelDescription>KS Beam receiver</modelDescription>
 <UDN>$udn</UDN>

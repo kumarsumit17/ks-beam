@@ -70,7 +70,7 @@ fun main() {
                     }
                     Menu(stringResource(Res.string.menu_help)) {
                         Item(stringResource(Res.string.menu_github), onClick = {
-                            runCatching { Desktop.getDesktop().browse(URI("https://github.com/kumarsumit17/ks-beam")) }
+                            runCatching { Desktop.getDesktop().browse(URI("https://github.com/kumasumit/ks-beam")) }
                         })
                     }
                 }

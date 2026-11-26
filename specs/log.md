@@ -1,5 +1,6 @@
 # 2026-11-26
 
+* **Update**: the repository moved to [github.com/kumasumit/ks-beam](https://github.com/kumasumit/ks-beam) (with KS-Suite and ks-utility); links, the macOS Help menu and the receiver's `manufacturerURL` follow.
 * **Update**: [Casting](casting.md) and [Per-platform optimization plan](plan-per-platform.md): step 5 built. Share to KS Beam on Android; the TV's volume (RenderingControl) from the slider, the desktops' up/down keys and the phone's volume buttons; Material You colours; predictive back. Fixes: a replaced cast's late `Stop` could stop the new file; SOAP requests retry once after a dropped connection; apostrophes showed a backslash (language files now converted with `lang.mjs compose`).
 
 # 2026-11-25
@@ -12,7 +13,7 @@
 * **Update**: [Casting](casting.md) and [Per-platform optimization plan](plan-per-platform.md): step 2 built. A cast now holds a cast lock on every sender: an Android `connectedDevice` foreground service with a media notification, a platform `MediaSession`, a wake lock and Wi-Fi locks; an IOKit power assertion on macOS; `SetThreadExecutionState` on Windows. macOS gets `NSLocalNetworkUsageDescription`; both Android apps declare `ACCESS_LOCAL_NETWORK` and ask for it on Android 17. New dependency (owner's decision): JNA 5.19.1 (Apache-2.0), desktop builds only, nothing else in its tree; the same version as ks-jaiplayer.
 * **Update**: [Per-platform optimization plan](plan-per-platform.md) approved by the owner; its decisions are asked when the step that needs them starts.
 * **Creation**: [Per-platform optimization plan](plan-per-platform.md) added (proposed, awaiting the owner): an audit of each build and what changes per OS, following the suite rule that each platform build is optimized for its OS. Key findings: no sender keeps the cast alive (sleep, the Android freezer, Wi-Fi power saving), no macOS Local Network text, no Windows firewall rule, no media controls outside the app.
-* **Update**: `ks-utility` moved from `v0.6.0` to `v0.9.0` (more languages, the translation tools; [ks-utility translation tools](https://github.com/kumarsumit17/ks-utility/blob/main/specs/translating.md)).
+* **Update**: `ks-utility` moved from `v0.6.0` to `v0.9.0` (more languages, the translation tools; [ks-utility translation tools](https://github.com/kumasumit/ks-utility/blob/main/specs/translating.md)).
 
 # 2026-11-24
 

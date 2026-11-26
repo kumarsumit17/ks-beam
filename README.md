@@ -1,6 +1,6 @@
 # KS Beam
 
-Cast videos, music and photos from your phone or computer to a TV or projector. Part of [KS-Suite](https://github.com/kumarsumit17/KS-Suite).
+Cast videos, music and photos from your phone or computer to a TV or projector. Part of [KS-Suite](https://github.com/kumasumit/KS-Suite).
 
 | | |
 |---|---|
