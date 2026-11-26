@@ -29,7 +29,8 @@ compose.desktop {
             this.packageVersion = packageVersion
             description = "KS Beam: cast to TVs and projectors"
             vendor = "KS-Suite"
-            modules("java.prefs", "java.desktop", "java.xml", "jdk.unsupported")
+            // jdk.accessibility: the Java Access Bridge, so Narrator and NVDA can read the window.
+            modules("java.prefs", "java.desktop", "java.xml", "jdk.unsupported", "jdk.accessibility")
             windows {
                 menu = true
                 menuGroup = "KS-Suite"
@@ -43,6 +44,10 @@ compose.desktop {
                 upgradeUuid = "98224424-ed1e-4649-bd85-390c159d53c9"
             }
         }
-        buildTypes.release.proguard { isEnabled.set(false) }
+        // ProGuard removes the unused parts of Compose, Kotlin and the other libraries (shrink only).
+        buildTypes.release.proguard {
+            isEnabled.set(true)
+            configurationFiles.from(rootProject.file("desktop-rules.pro"))
+        }
     }
 }

@@ -66,6 +66,10 @@ compose.desktop {
                 }
             }
         }
-        buildTypes.release.proguard { isEnabled.set(false) }
+        // ProGuard removes the unused parts of Compose, Kotlin and the other libraries (shrink only).
+        buildTypes.release.proguard {
+            isEnabled.set(true)
+            configurationFiles.from(rootProject.file("desktop-rules.pro"))
+        }
     }
 }

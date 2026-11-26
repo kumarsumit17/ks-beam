@@ -147,6 +147,7 @@ fun runDesktopApp(options: DesktopOptions) {
             LaunchedEffect(window) {
                 options.onWindow(window)
                 acceptDroppedFiles(window)
+                smokeTest(options)
             }
             LaunchedEffect(state) {
                 while (true) {
@@ -182,4 +183,16 @@ private fun acceptDroppedFiles(window: ComposeWindow) {
     DropTarget(window, DnDConstants.ACTION_COPY, target, true)
     DropTarget(window.contentPane, DnDConstants.ACTION_COPY, target, true)
     window.contentPane.components.forEach { DropTarget(it, DnDConstants.ACTION_COPY, target, true) }
+}
+
+/**
+ * CI's start-up check of a packaged build (`KS_BEAM_SMOKE_TEST=<file>`): once the window is up, the
+ * keep-awake is taken and released (the native calls through JNA), "ok" is written to the file and
+ * the app quits. Never set in normal use.
+ */
+private fun smokeTest(options: DesktopOptions) {
+    val path = System.getenv("KS_BEAM_SMOKE_TEST")?.takeIf { it.isNotBlank() } ?: return
+    val result = runCatching { options.keepAwake().close() }.fold({ "ok" }, { "keep-awake failed: $it" })
+    File(path).writeText(result)
+    kotlin.system.exitProcess(if (result == "ok") 0 else 1)
 }

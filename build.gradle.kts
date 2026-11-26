@@ -75,8 +75,20 @@ subprojects {
                     keyPassword = signingValue("SIGNING_KEY_PASSWORD", "keyPassword")
                 }
             }
+            // `-Pks.beam.r8debug=true` shrinks the debug build the same way, so emulator tests (which
+            // need the debug-only test hooks) run the code R8 leaves in a release.
+            if (providers.gradleProperty("ks.beam.r8debug").orNull == "true") {
+                buildTypes.getByName("debug") {
+                    isMinifyEnabled = true
+                    isShrinkResources = true
+                    proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), rootProject.file("android-rules.pro"))
+                }
+            }
             buildTypes.getByName("release") {
-                isMinifyEnabled = false
+                // R8: removes unused code and resources, so each app ships only what it runs.
+                isMinifyEnabled = true
+                isShrinkResources = true
+                proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), rootProject.file("android-rules.pro"))
                 signingConfig = signingConfigs.findByName("release")
             }
             compileOptions {

@@ -92,7 +92,13 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
             try {
                 withContext(Dispatchers.IO) {
                     val report = { r: Renderer -> scope.launch { found += r; renderers = mergeRenderers(renderers, r) }; Unit }
-                    platform.extraRenderers.forEach { location -> DeviceDescription.fetch(location)?.let(report) }
+                    platform.extraRenderers.forEach { location ->
+                        DeviceDescription.fetch(location)?.let { r ->
+                            report(r)
+                            // A renderer named for testing is the one to use, whatever else answers.
+                            scope.launch { if (selected == null) selected = r }
+                        }
+                    }
                     platform.searchLock().use { RendererFinder().find(onFound = report) }
                 }
             } finally {
