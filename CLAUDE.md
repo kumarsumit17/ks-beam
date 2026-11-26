@@ -51,9 +51,9 @@ To cast from the phone emulator or the desktop app to a renderer SSDP can't reac
 - KS Beam has no in-app updater (an internet check is an open owner question, `specs/plan-v1.md`). If one is added, the phone app asks for `UpdatePlatform.ANDROID` and the TV app for `UpdatePlatform.GOOGLE_TV`.
 
 ## Releases
-- The owner's rule (2026-11-25): every feature or fix is built, tested, then committed, pushed and released, without waiting for a review or a confirmation; a tag needs no separate OK. Never commit or release while a test or CI fails.
+- The suite rule "Build, test, release, no waiting" (`specs/releases.md`): every feature or fix is built, tested on the emulators or in CI, pushed to `dev` and released with the next tag, without asking anyone before the tag. Never commit or release while a test or CI fails.
 - A feature raises MINOR, a fix raises PATCH. Each platform has its own version: `android-vX.Y.Z` (phone app), `google-tv-vX.Y.Z` (TV app), `mac-vX.Y.Z`, `windows-vX.Y.Z` release only that build; a plain `vX.Y.Z` releases all four. A platform's next version is higher than both its own last tag and the last plain tag (KS-Suite `specs/versioning-signing.md`, "Platform tags"). KS Beam has no updater, so no bridge release.
-- The owner's hand checks (a real TV, the Mac window, Windows) happen after the release and never block it.
+- The owner's hand checks on real devices (a real TV and phone, the Mac window, Windows) happen after the release and never block it; what they find goes into the next version.
 
 ## Platform folders
 - Every KS-Suite app repo has the same top-level platform folders: `tv/google-tv/`, `desktop/mac/`, `desktop/windows/`, `mobile/android/` and `mobile/ios/`. All five exist in every app repo, whether or not the app supports that platform yet.

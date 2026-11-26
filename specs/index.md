@@ -15,5 +15,6 @@ okf_version: "0.2"
 
 # Policies
 
+* [Releases](releases.md) - How KS Beam is released: build, test, release without waiting, one version per platform or one for all, and the owner's hand checks afterwards.
 * [Constraints](constraints.md) - The privacy and network rules every change to KS Beam must keep.
 * [Dependencies](dependencies.md) - Third-party dependencies are kept to the minimum; the order of preference and what must be reported for each new one.
