@@ -1,5 +1,6 @@
 # 2026-11-26
 
+* **Release**: `v1.3.0` (all platforms): plan step 5 and the apostrophe and recast fixes. APKs and AABs signed with the suite key and attested; dmg and msi.
 * **Update**: the repository moved to [github.com/kumasumit/ks-beam](https://github.com/kumasumit/ks-beam) (with KS-Suite and ks-utility); links, the macOS Help menu and the receiver's `manufacturerURL` follow.
 * **Update**: [Casting](casting.md) and [Per-platform optimization plan](plan-per-platform.md): step 5 built. Share to KS Beam on Android; the TV's volume (RenderingControl) from the slider, the desktops' up/down keys and the phone's volume buttons; Material You colours; predictive back. Fixes: a replaced cast's late `Stop` could stop the new file; SOAP requests retry once after a dropped connection; apostrophes showed a backslash (language files now converted with `lang.mjs compose`).
 
