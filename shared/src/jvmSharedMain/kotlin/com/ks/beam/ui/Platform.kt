@@ -1,5 +1,6 @@
 package com.ks.beam.ui
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import com.ks.beam.core.MediaSource
 import com.ks.beam.core.Position
@@ -42,6 +43,10 @@ interface BeamPlatform {
      */
     fun castLock(session: CastSession): CastLock = CastLock.None
 
+    /** The OS's own colours (Android 12+: from the wallpaper); null keeps KS Beam's. */
+    @Composable
+    fun colorScheme(): ColorScheme? = null
+
     /** Applies [language] to the interface below it (platform-specific resource lookup). */
     @Composable
     fun ProvideLanguage(language: String, content: @Composable () -> Unit)
@@ -55,6 +60,9 @@ interface CastSession {
     val position: Position
     /** The control labels in the interface's language. */
     val labels: CastLabels
+    /** The TV's volume, 0 to 100; null when it has no volume control. */
+    val volume: Int?
+    fun setVolume(level: Int)
     fun togglePlay()
     fun seekBy(delta: Long)
     fun seekTo(seconds: Long)

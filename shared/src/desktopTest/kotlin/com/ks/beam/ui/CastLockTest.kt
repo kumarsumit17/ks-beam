@@ -101,4 +101,28 @@ class CastLockTest {
         assertEquals(BeamError.Unsupported, state.error)
         assertEquals(null, state.pendingMedia)
     }
+
+    @Test fun aSecondFileReplacesTheRunningCast() {
+        FakeRenderer().use { tv ->
+            val platform = TestPlatform()
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            try {
+                val state = BeamState(platform, scope)
+                state.selected = assertNotNull(DeviceDescription.fetch(tv.location))
+                state.castMedia(BytesMedia("first.mp4", ByteArray(4096)))
+                assertTrue(waitFor { state.cast?.media?.name == "first.mp4" }, "first cast: ${state.error}")
+                state.castMedia(BytesMedia("second.mp4", ByteArray(4096)))
+                assertTrue(waitFor { state.cast?.media?.name == "second.mp4" }, "second cast did not start: ${state.error}")
+                Thread.sleep(1500) // the first cast's stop runs on its own thread
+                val last = tv.actions.map { it.first }.filter { it != "GetPositionInfo" && it != "GetTransportInfo" && it != "GetVolume" }
+                assertEquals("Play", last.last(), "the TV's last command was ${last.takeLast(4)}")
+                // The first cast's "stop" reaches the TV before the second file, never after it.
+                val afterSecond = last.drop(last.lastIndexOf("SetAVTransportURI"))
+                assertTrue("Stop" !in afterSecond, "a Stop reached the TV after the second file: $afterSecond")
+                assertEquals(null, state.error)
+            } finally {
+                scope.cancel()
+            }
+        }
+    }
 }

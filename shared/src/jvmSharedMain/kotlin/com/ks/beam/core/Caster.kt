@@ -26,6 +26,12 @@ class Cast(
 ) : AutoCloseable {
     private val server = serverFor(renderer)
     private val transport = AvTransport(renderer)
+    private val rendering = RenderingControl.of(renderer)
+
+    /** Whether the TV's volume can be read and set (it has a RenderingControl service). */
+    val hasVolume: Boolean get() = rendering != null
+    fun volume(): Int? = rendering?.volume()
+    fun setVolume(level: Int) { rendering?.setVolume(level) }
     val url: String = server.publish(media)
 
     /** Loads the file on the renderer and starts it. */

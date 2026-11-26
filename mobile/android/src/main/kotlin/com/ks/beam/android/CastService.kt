@@ -20,6 +20,7 @@ import android.os.PowerManager
 import android.os.SystemClock
 import com.ks.beam.ui.CastLock
 import com.ks.beam.ui.CastSession
+import com.ks.beam.ui.VOLUME_STEP
 
 /**
  * Runs while a cast is active (specs/plan-per-platform.md, step 2). The phone is the TV's file
@@ -34,6 +35,7 @@ class CastService : Service() {
     private val locks = mutableListOf<() -> Unit>()
     private var foreground = false
     private var shown: List<Any?>? = null
+    private var volume: VolumeProvider? = null
 
     override fun onBind(intent: Intent?) = null
 
@@ -50,8 +52,7 @@ class CastService : Service() {
                 override fun onCustomAction(action: String, extras: Bundle?) = command(action)
             })
             // The TV plays, not this phone: a remote session, so the system's output chip and media
-            // keys treat it as casting. Volume stays on the TV for now (fixed).
-            setPlaybackToRemote(object : VolumeProvider(VOLUME_CONTROL_FIXED, 100, 100) {})
+            // controls treat it as casting. Its volume is set in update(), from the TV's.
             isActive = true
         }
         holdLocks()
@@ -112,6 +113,7 @@ class CastService : Service() {
     /** Shows the session's current state in the notification and the MediaSession. */
     fun update() {
         val s = session
+        updateVolume(s)
         val labels = s?.labels
         val channel = labels?.channel?.ifBlank { null } ?: applicationInfo.loadLabel(packageManager).toString()
         val manager = getSystemService(NotificationManager::class.java)
@@ -191,6 +193,32 @@ class CastService : Service() {
         } else {
             manager.notify(NOTIFICATION_ID, notification)
         }
+    }
+
+    /**
+     * The phone's volume buttons and the system volume panel set the TV's own volume while this
+     * session is the active remote one (RenderingControl); a TV without it keeps a fixed volume.
+     */
+    private fun updateVolume(s: CastSession?) {
+        val level = s?.volume
+        val p = volume
+        if (level == null) {
+            if (p == null || p.volumeControl != VolumeProvider.VOLUME_CONTROL_FIXED) {
+                volume = object : VolumeProvider(VOLUME_CONTROL_FIXED, 100, 100) {}.also(media::setPlaybackToRemote)
+            }
+            return
+        }
+        if (p != null && p.volumeControl == VolumeProvider.VOLUME_CONTROL_ABSOLUTE) {
+            if (p.currentVolume != level) p.currentVolume = level
+            return
+        }
+        volume = object : VolumeProvider(VOLUME_CONTROL_ABSOLUTE, 100, level) {
+            override fun onSetVolumeTo(volume: Int) { session?.setVolume(volume) }
+            override fun onAdjustVolume(direction: Int) {
+                val current = session?.volume ?: return
+                session?.setVolume(current + direction * VOLUME_STEP)
+            }
+        }.also(media::setPlaybackToRemote)
     }
 
     companion object {

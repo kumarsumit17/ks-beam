@@ -12,6 +12,7 @@
   "cast.starting": "Starting on the TV…",
   "cast.channel": "Casting",
   "cast.pending": "Choose a TV or projector to cast {file}.",
+  "cast.volume": "Volume",
   "cast.play": "Play",
   "cast.stop": "Stop casting",
   "cast.seekBack": "Back 10 seconds",

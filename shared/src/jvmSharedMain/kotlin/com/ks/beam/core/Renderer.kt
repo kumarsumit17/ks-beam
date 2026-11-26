@@ -17,6 +17,9 @@ data class Renderer(
     val avTransportUrl: String,
     /** The exact AVTransport service type the device declared (`…:AVTransport:1` or `:2`). */
     val avTransportType: String,
+    /** Absolute control URL of the RenderingControl service (the TV's volume); null when it has none. */
+    val renderingControlUrl: String? = null,
+    val renderingControlType: String? = null,
 ) {
     /** The renderer's host, used to pick the local interface that reaches it. */
     val host: String get() = URI(avTransportUrl).host
@@ -33,19 +36,29 @@ object DeviceDescription {
         val base = root.firstText("URLBase")?.takeIf { it.isNotBlank() } ?: location
         val device = root.getElementsByTagNameNS("*", "device").item(0) as? Element ?: return null
 
+        var avt: Pair<String, String>? = null // control URL to service type
+        var rc: Pair<String, String>? = null
         val services = root.getElementsByTagNameNS("*", "service")
         for (i in 0 until services.length) {
             val service = services.item(i) as Element
             val type = service.firstText("serviceType").orEmpty()
-            if (!type.contains(":service:AVTransport:")) continue
             val control = service.firstText("controlURL") ?: continue
+            val url = URL(URL(base), control).toString()
+            when {
+                type.contains(":service:AVTransport:") && avt == null -> avt = url to type
+                type.contains(":service:RenderingControl:") && rc == null -> rc = url to type
+            }
+        }
+        if (avt != null) {
             return Renderer(
                 id = device.firstText("UDN").orEmpty().ifEmpty { location },
                 name = device.firstText("friendlyName").orEmpty().ifEmpty { URI(location).host },
                 manufacturer = device.firstText("manufacturer").orEmpty(),
                 model = device.firstText("modelName").orEmpty(),
-                avTransportUrl = URL(URL(base), control).toString(),
-                avTransportType = type,
+                avTransportUrl = avt.first,
+                avTransportType = avt.second,
+                renderingControlUrl = rc?.first,
+                renderingControlType = rc?.second,
             )
         }
         return null

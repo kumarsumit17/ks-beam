@@ -39,8 +39,23 @@ class FakeRenderer(private val faultFor: Map<String, Int> = emptyMap()) : AutoCl
             ex.sendResponseHeaders(status, bytes.size.toLong())
             ex.responseBody.use { it.write(bytes) }
         }
+        http.createContext("/ctl/rc") { ex ->
+            val action = ex.requestHeaders.getFirst("SOAPACTION").orEmpty().trim('"').substringAfter('#')
+            val request = ex.requestBody.readBytes().decodeToString()
+            actions += action to request
+            if (action == "SetVolume") {
+                Regex("<DesiredVolume>(\\d+)</DesiredVolume>").find(request)?.let { volume = it.groupValues[1].toInt() }
+            }
+            val args = if (action == "GetVolume") "<CurrentVolume>$volume</CurrentVolume>" else ""
+            val bytes = envelope("<u:${action}Response xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\">$args</u:${action}Response>").toByteArray()
+            ex.sendResponseHeaders(200, bytes.size.toLong())
+            ex.responseBody.use { it.write(bytes) }
+        }
         http.start()
     }
+
+    /** The TV's volume as RenderingControl reports and sets it. */
+    @Volatile var volume = 30
 
     private fun responseArgs(action: String) = when (action) {
         "GetPositionInfo" -> "<Track>1</Track><TrackDuration>0:01:40</TrackDuration><RelTime>0:00:42</RelTime>"

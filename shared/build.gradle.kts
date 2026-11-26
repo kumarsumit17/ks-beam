@@ -64,7 +64,8 @@ val languageResources by tasks.registering(Exec::class) {
     inputs.dir(sharedLangDir)
     outputs.dir(langResources)
     val out = langResources.get().asFile
-    commandLine("node", langTool.path, "android", langDir.asFile.path, "--out", out.path)
+    // `compose`: escaped for Compose resources, which show Android's \' literally ("didn\'t").
+    commandLine("node", langTool.path, "compose", langDir.asFile.path, "--out", out.path)
 }
 
 val checkLanguageFiles by tasks.registering(Exec::class) {

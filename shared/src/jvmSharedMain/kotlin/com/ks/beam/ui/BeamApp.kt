@@ -33,6 +33,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import com.ks.beam.resources.cast_volume
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import com.ks.beam.resources.devices_firewall
 import com.ks.beam.resources.cast_pending
 import androidx.compose.ui.input.key.type
@@ -115,7 +118,7 @@ fun BeamApp(
     // The cast ends with the interface (window closed, app swiped away), releasing its lock.
     DisposableEffect(state) { onDispose { state.stop() } }
 
-    MaterialTheme(colorScheme = BeamColors) {
+    MaterialTheme(colorScheme = platform.colorScheme() ?: BeamColors) {
         platform.ProvideLanguage(state.language) {
             // The OS's media controls (Android notification) show these, in the chosen language.
             val labels = CastLabels(
@@ -166,7 +169,8 @@ fun rememberBeamState(platform: BeamPlatform): BeamState {
 
 /**
  * The keys every sender shares, matching the TV remote ([Constraints](specs/constraints.md)):
- * Space plays or pauses, left and right seek 10 s, Esc stops. Only while casting.
+ * Space plays or pauses, left and right seek 10 s, up and down change the TV's volume, Esc stops.
+ * Only while casting.
  */
 fun BeamState.handleKey(event: KeyEvent): Boolean {
     if (cast == null || event.type != KeyEventType.KeyDown) return false
@@ -175,6 +179,8 @@ fun BeamState.handleKey(event: KeyEvent): Boolean {
         Key.Spacebar -> togglePlay()
         Key.DirectionLeft -> seekBy(-10)
         Key.DirectionRight -> seekBy(10)
+        Key.DirectionUp -> if (volume != null) changeVolume(VOLUME_STEP) else return false
+        Key.DirectionDown -> if (volume != null) changeVolume(-VOLUME_STEP) else return false
         Key.Escape -> stop()
         else -> return false
     }
@@ -314,6 +320,20 @@ private fun ColumnScope.CastPanel(state: BeamState, renderer: Renderer, fileName
         }
         FilledTonalButton(onClick = { state.seekBy(10) }, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.cast_seek_forward)) }
     }
+    state.volume?.let { level ->
+        // The TV's own volume (RenderingControl), when it has one.
+        Spacer(Modifier.height(20.dp))
+        Text(stringResource(Res.string.cast_volume), style = MaterialTheme.typography.bodySmall)
+        var dragging by remember { mutableStateOf<Float?>(null) }
+        val volumeLabel = stringResource(Res.string.cast_volume)
+        Slider(
+            value = dragging ?: level.toFloat(),
+            onValueChange = { dragging = it },
+            onValueChangeFinished = { dragging?.let { state.setVolume(it.toInt()) }; dragging = null },
+            valueRange = 0f..100f,
+            modifier = Modifier.semantics { contentDescription = volumeLabel },
+        )
+    }
     Spacer(Modifier.height(12.dp))
     OutlinedButton(onClick = state::stop, modifier = Modifier.fillMaxWidth()) { Text(stringResource(Res.string.cast_stop)) }
 }
@@ -336,3 +356,6 @@ private fun ErrorBanner(error: BeamError, onClose: () -> Unit) {
         }
     }
 }
+
+/** The volume step for keys and the phone's volume buttons. */
+const val VOLUME_STEP = 5

@@ -11,6 +11,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.Dispatchers
+import com.ks.beam.ui.rememberBeamState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.ColorScheme
+import android.net.Uri
+import android.content.Intent
 import com.ks.beam.core.MediaSource
 import com.ks.beam.ui.BeamApp
 import com.ks.beam.ui.BeamPlatform
@@ -83,6 +92,7 @@ class MainActivity : ComponentActivity(), BeamPlatform {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        takeShared(intent)
         if (Build.VERSION.SDK_INT >= LOCAL_NETWORK_SDK && !granted(LOCAL_NETWORK)) askLocalNetwork.launch(LOCAL_NETWORK) else show()
     }
 
@@ -91,8 +101,42 @@ class MainActivity : ComponentActivity(), BeamPlatform {
     private fun show() {
         if (shown) return
         shown = true
-        setContent { BeamApp(this) }
+        setContent {
+            val state = rememberBeamState(this)
+            // Files shared to KS Beam from another app are cast like one chosen with the picker.
+            LaunchedEffect(state) {
+                for (uri in sharedFiles) {
+                    withContext(Dispatchers.IO) { runCatching { ContentMediaSource.from(contentResolver, uri) }.getOrNull() }
+                        ?.let(state::castMedia)
+                }
+            }
+            BeamApp(this, state)
+        }
     }
+
+    // ---- Sharing to KS Beam (Android's share menu) ----------------------------------------------
+    private val sharedFiles = Channel<Uri>(Channel.UNLIMITED)
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        takeShared(intent)
+    }
+
+    private fun takeShared(intent: Intent?) {
+        if (intent?.action != Intent.ACTION_SEND) return
+        val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        } else {
+            @Suppress("DEPRECATION") intent.getParcelableExtra(Intent.EXTRA_STREAM)
+        }
+        uri?.let { sharedFiles.trySend(it) }
+    }
+
+    /** Material You on Android 12+: the interface takes its colours from the wallpaper (dark). */
+    @Composable
+    override fun colorScheme(): ColorScheme? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) dynamicDarkColorScheme(this) else null
 }
 
 /** Android 17: the permission to reach the local network (not yet named in Build.VERSION_CODES here). */

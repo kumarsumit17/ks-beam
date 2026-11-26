@@ -152,4 +152,25 @@ class CastingTest {
         assertNull(Mime.forName("notes.txt"))
         assertEquals(MediaKind.Photo, Mime.kind("image/jpeg"))
     }
+
+    @Test fun readsAndSetsTheTvVolume() {
+        FakeRenderer().use { tv ->
+            val renderer = assertNotNull(DeviceDescription.fetch(tv.location))
+            assertEquals("${tv.location.substringBefore("/desc.xml")}/ctl/rc", renderer.renderingControlUrl)
+            val rc = assertNotNull(RenderingControl.of(renderer))
+            assertEquals(30, rc.volume())
+            rc.setVolume(55)
+            assertEquals(55, tv.volume)
+            assertContains(tv.actions.last().second, "<Channel>Master</Channel>")
+            rc.setVolume(150) // clamped to DLNA's 0..100
+            assertEquals(100, tv.volume)
+        }
+    }
+
+    @Test fun aRendererWithoutRenderingControlHasNoVolume() {
+        val xml = FakeRenderer.DESCRIPTION.replace(Regex("<service>\\s*<serviceType>urn:schemas-upnp-org:service:RenderingControl:1</serviceType>\\s*<controlURL>/ctl/rc</controlURL>\\s*</service>"), "")
+        val renderer = assertNotNull(DeviceDescription.parse(xml.toByteArray(), "http://192.168.1.20:1400/desc.xml"))
+        assertNull(renderer.renderingControlUrl)
+        assertNull(RenderingControl.of(renderer))
+    }
 }

@@ -45,6 +45,15 @@ SOAP 1.1 POSTs to the control URL, `SOAPACTION: "<serviceType>#<Action>"`, `Inst
 - A SOAP fault is shown with its UPnP error code (for example 714, "illegal MIME type": the TV cannot play that format).
 - Requests time out after 5 seconds.
 
+### Volume (`RenderingControl`)
+
+- When the device description has a RenderingControl service, KS Beam reads its volume (`GetVolume`, `Channel` `Master`) as a cast starts and sets it (`SetVolume`, 0 to 100) from the slider, the desktops' up and down keys and the phone's volume buttons (the cast's MediaSession has an absolute volume, so Android's volume panel shows the TV's). A renderer without one has no volume control in KS Beam.
+
+### Reliability
+
+- A SOAP request that fails at the connection level (often a kept-alive connection the TV already closed) is sent once more; the TV refusing an action (a UPnP error) is not retried.
+- When a new file replaces a running cast, the old cast's `Stop` is sent and finished before the new file's `SetAVTransportURI`, so a late `Stop` never stops the new file.
+
 ## 4. Formats
 
 The renderer decodes the file, so what plays depends on the TV. KS Beam sends the file as it is (no transcoding) with a MIME type from its extension: mp4, m4v, mkv, webm, mov, avi, ts for video; mp3, m4a, aac, flac, wav, ogg for audio; jpg, png, gif, webp for photos. MP4 (H.264, AAC) and MP3 play on nearly every TV.

@@ -1,3 +1,7 @@
+# 2026-11-26
+
+* **Update**: [Casting](casting.md) and [Per-platform optimization plan](plan-per-platform.md): step 5 built. Share to KS Beam on Android; the TV's volume (RenderingControl) from the slider, the desktops' up/down keys and the phone's volume buttons; Material You colours; predictive back. Fixes: a replaced cast's late `Stop` could stop the new file; SOAP requests retry once after a dropped connection; apostrophes showed a backslash (language files now converted with `lang.mjs compose`).
+
 # 2026-11-25
 
 * **Update**: [Per-platform optimization plan](plan-per-platform.md): step 1 back and built under the suite's platform-tag rule: ks-utility `v0.10.1`, `release.yml` for `android-v`, `google-tv-v`, `mac-v`, `windows-v` and plain tags, a platform input for rehearsals; no bridge release (no updater).

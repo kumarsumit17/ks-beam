@@ -45,6 +45,8 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
     var starting by mutableStateOf(false); private set
     var playing by mutableStateOf(false); private set
     var position by mutableStateOf(Position(0, 0)); private set
+    /** The TV's volume, 0 to 100; null when it can't be read or set (no RenderingControl). */
+    var volume by mutableStateOf<Int?>(null); private set
     var error by mutableStateOf<BeamError?>(null)
     /** Show the Windows firewall explanation when no TV is found. */
     val explainFirewall: Boolean get() = platform.explainFirewall
@@ -69,6 +71,8 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
         override val playing get() = this@BeamState.playing
         override val position get() = this@BeamState.position
         override val labels get() = this@BeamState.labels
+        override val volume get() = this@BeamState.volume
+        override fun setVolume(level: Int) = this@BeamState.setVolume(level)
         override fun togglePlay() = this@BeamState.togglePlay()
         override fun seekBy(delta: Long) = this@BeamState.seekBy(delta)
         override fun seekTo(seconds: Long) = this@BeamState.seekTo(seconds)
@@ -120,12 +124,15 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
             return
         }
         pendingMedia = null
+        // The cast being replaced is told to stop on its own thread; the new one waits for that,
+        // or the old "stop" could reach the TV after the new file has started and stop it.
+        val previous = stopCast()
         scope.launch {
-            stop()
             error = null
             starting = true
             try {
                 val started = withContext(Dispatchers.IO) {
+                    previous?.join(3000)
                     val c = Cast(renderer, media)
                     try {
                         c.start(); c
@@ -136,8 +143,13 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
                 cast = started
                 playing = true
                 position = Position(0, 0)
+                volume = null
                 lock = platform.castLock(session)
                 startPolling(started)
+                if (started.hasVolume) {
+                    volume = runCatching { withContext(Dispatchers.IO) { started.volume() } }.getOrNull()
+                    lock?.changed()
+                }
             } catch (e: UpnpException) {
                 error = if (e.code == 714) BeamError.Format(e.code) else BeamError.Refused(e.code)
             } catch (e: Exception) {
@@ -157,6 +169,17 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
     }
 
     fun seekBy(delta: Long) = seekTo(position.seconds + delta)
+
+    /** Sets the TV's own volume (0 to 100), when it has one. */
+    fun setVolume(level: Int) {
+        if (volume == null) return
+        val target = level.coerceIn(0, 100)
+        volume = target
+        lock?.changed()
+        control { it.setVolume(target) }
+    }
+
+    fun changeVolume(delta: Int) { volume?.let { setVolume(it + delta) } }
 
     fun seekTo(seconds: Long) {
         val max = position.durationSeconds.takeIf { it > 0 } ?: Long.MAX_VALUE
@@ -182,6 +205,7 @@ class BeamState(private val platform: BeamPlatform, private val scope: Coroutine
         val c = cast ?: return null
         cast = null
         playing = false
+        volume = null
         // Not on [scope]: stop() also runs while the interface's scope is being cancelled.
         return Thread({ runCatching { c.close() } }, "ks-beam-stop").apply { start() }
     }
