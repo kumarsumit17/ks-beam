@@ -1,5 +1,6 @@
 # 2026-11-26
 
+* **Update**: `ks-utility` moved from `v0.10.1` to `v0.13.2` (the suite rule: the newest tag before each release). Only Hindi terms changed in between; the stricter language check passes with no change to KS Beam's files. The release workflow follows to `@v0.13.2`.
 * **Creation**: [Releases](releases.md) added: the suite rule "Build, test, release, no waiting" as KS Beam applies it, platform tags, and the owner's hand checks after a release.
 * **Release**: `v1.3.0` (all platforms): plan step 5 and the apostrophe and recast fixes. APKs and AABs signed with the suite key and attested; dmg and msi.
 * **Update**: the repository moved to [github.com/kumasumit/ks-beam](https://github.com/kumasumit/ks-beam) (with KS-Suite and ks-utility); links, the macOS Help menu and the receiver's `manufacturerURL` follow.
