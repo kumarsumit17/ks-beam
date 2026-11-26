@@ -42,6 +42,7 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 ./gradlew :desktop:mac:packageReleaseDmg      # .dmg; needs a non-Homebrew JDK (e.g. Corretto) or CI
 ```
 Emulators are behind their own NAT and can't be discovered. Test the receiver on the TV emulator by forwarding its port and casting from the Mac: `adb forward tcp:49152 tcp:<port from logcat "receiver ready at">`, then `KS_BEAM_RENDERER=http://127.0.0.1:49152/desc.xml KS_BEAM_MEDIA=<file.mp4> KS_BEAM_MEDIA_HOST=10.0.2.2 ./gradlew :shared:desktopTest --tests '*EmulatorCastTest*'`. Emulators: the workspace's `scripts/emulators.sh` and `specs/testing.md`.
+Release builds are shrunk: R8 on Android (`android-rules.pro`), ProGuard on the desktops (`desktop-rules.pro`). `-Pks.beam.r8debug=true` shrinks the debug build too, to test the shrunk code with the debug-only hooks. `KS_BEAM_SMOKE_TEST=<file>` makes a packaged desktop build open, check its native calls, write "ok" and quit (CI runs it on Windows).
 To cast from the phone emulator or the desktop app to a renderer SSDP can't reach, name its description: `adb shell am start -n com.ks.beam/.android.MainActivity --es ks.beam.renderer http://10.0.2.2:49152/desc.xml` (debug builds only), or `KS_BEAM_RENDERER=<url>` for the desktop app.
 
 ## Phone and Google TV apps
