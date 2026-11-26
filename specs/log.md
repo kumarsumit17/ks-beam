@@ -1,5 +1,6 @@
 # 2026-11-26
 
+* **Update**: `ks-utility` moved from `v0.13.2` to `v0.14.0` before the release (only the Tauri apps' release workflows were added); the release workflow follows.
 * **Update**: [Per-platform optimization plan](plan-per-platform.md): step 6 built (R8 on both Android apps, ProGuard on the desktops, `jdk.accessibility` on Windows, a start-up check of the installed Windows app in CI, start-up measured); step 8 added for the macOS Now Playing and media keys.
 * **Update**: `ks-utility` moved from `v0.10.1` to `v0.13.2` (the suite rule: the newest tag before each release). Only Hindi terms changed in between; the stricter language check passes with no change to KS Beam's files. The release workflow follows to `@v0.13.2`.
 * **Creation**: [Releases](releases.md) added: the suite rule "Build, test, release, no waiting" as KS Beam applies it, platform tags, and the owner's hand checks after a release.
