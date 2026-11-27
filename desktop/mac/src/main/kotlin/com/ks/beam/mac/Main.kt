@@ -28,7 +28,8 @@ import java.util.concurrent.TimeUnit
 
 /**
  * macOS entry point: the system menu bar, a title bar drawn over the content, Finder's "Open With"
- * and drops on the Dock icon, keep-awake while casting, and the languages from System Settings.
+ * and drops on the Dock icon, keep-awake while casting, Now Playing and the media keys, and the
+ * languages from System Settings.
  */
 fun main() {
     System.setProperty("apple.laf.useScreenMenuBar", "true")
@@ -43,6 +44,7 @@ fun main() {
         DesktopOptions(
             systemLanguages = preferredLanguages(),
             keepAwake = { keepAwake("KS Beam is casting to a TV") },
+            mediaSession = NowPlaying::lock,
             // The traffic lights sit over the content; keep it below them.
             contentPadding = PaddingValues(top = 28.dp),
             onWindow = { window ->

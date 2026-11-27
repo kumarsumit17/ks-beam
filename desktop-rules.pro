@@ -5,6 +5,9 @@
 -keep class com.sun.jna.** { *; }
 -keep interface * extends com.sun.jna.Library { *; }
 -keep class * implements com.sun.jna.Library { *; }
+# The macOS Now Playing command handlers are JNA callbacks called from Objective-C.
+-keep interface * extends com.sun.jna.Callback { *; }
+-keep class * implements com.sun.jna.Callback { *; }
 -dontwarn com.sun.jna.**
 
 # Coroutines' Swing dispatcher is found through a service loader.

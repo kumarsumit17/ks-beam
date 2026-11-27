@@ -1,5 +1,6 @@
 # 2026-11-27
 
+* **Update**: [Per-platform optimization plan](plan-per-platform.md): step 8 built: macOS Now Playing and the media keys (MPNowPlayingInfoCenter, MPRemoteCommandCenter through JNA), part of the Mac cast lock.
 * **Release**: `v1.5.0` (all platforms): plan step 7, screen readers, large text, Windows High Contrast, and the config-change fix.
 * **Release**: `v1.4.0` (all platforms): plan step 6, R8 and ProGuard (phone APK 1.0 MB, TV APK 1.8 MB, dmg 58 MB, msi 48 MB), Windows screen readers.
 * **Update**: [Per-platform optimization plan](plan-per-platform.md): step 7 built (screen-reader labels, states and actions; large-text layout; Windows High Contrast). Fix: a change of text size, language or display size during a cast no longer stops it.

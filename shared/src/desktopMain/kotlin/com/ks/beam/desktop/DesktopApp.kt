@@ -65,6 +65,7 @@ private class DesktopPlatform(
     override val systemLanguages: List<String>,
     private val keepAwake: () -> AutoCloseable,
     override val explainFirewall: Boolean,
+    private val mediaSession: (CastSession) -> CastLock?,
 ) : BeamPlatform {
     override val settings: SettingsStore = PrefsSettings()
     override val extraRenderers: List<String> = listOfNotNull(System.getenv("KS_BEAM_RENDERER")?.takeIf { it.isNotBlank() })
@@ -82,8 +83,13 @@ private class DesktopPlatform(
     // While a cast runs this computer is the TV's file server: the OS must not sleep.
     override fun castLock(session: CastSession): CastLock {
         val awake = keepAwake()
+        val media = mediaSession(session)
         return object : CastLock {
-            override fun close() = awake.close()
+            override fun changed() { media?.changed() }
+            override fun close() {
+                media?.close()
+                awake.close()
+            }
         }
     }
 
@@ -107,6 +113,8 @@ class DesktopOptions(
     val systemLanguages: List<String>,
     /** Keeps the OS from sleeping until closed. */
     val keepAwake: () -> AutoCloseable = { AutoCloseable {} },
+    /** The OS's media controls for a running cast (macOS: Now Playing and the media keys). */
+    val mediaSession: (CastSession) -> CastLock? = { null },
     /** Explain the firewall prompt when no TV is found (Windows). */
     val explainFirewall: Boolean = false,
     /** Room for a title bar drawn over the content (macOS). */
@@ -135,7 +143,7 @@ object OpenedFiles {
 
 /** Starts the desktop app with what [options] adds for this OS. */
 fun runDesktopApp(options: DesktopOptions) {
-    val platform = DesktopPlatform(options.systemLanguages, options.keepAwake, options.explainFirewall)
+    val platform = DesktopPlatform(options.systemLanguages, options.keepAwake, options.explainFirewall, options.mediaSession)
     application {
         val state = rememberBeamState(platform)
         // Quitting (closing the window, or the app menu's Quit on macOS) tells the TV to stop first.
@@ -201,7 +209,15 @@ private fun acceptDroppedFiles(window: ComposeWindow) {
  */
 private fun smokeTest(options: DesktopOptions) {
     val path = System.getenv("KS_BEAM_SMOKE_TEST")?.takeIf { it.isNotBlank() } ?: return
-    val result = runCatching { options.keepAwake().close() }.fold({ "ok" }, { "keep-awake failed: $it" })
+    val result = runCatching {
+        options.keepAwake().close()
+        // macOS: Now Playing starts and stops (it returns null if its native calls fail).
+        if (System.getProperty("os.name").startsWith("Mac")) {
+            val media = options.mediaSession(SmokeSession) ?: error("Now Playing did not start")
+            media.changed()
+            media.close()
+        }
+    }.fold({ "ok" }, { "start-up check failed: $it" })
     File(path).writeText(result)
     kotlin.system.exitProcess(if (result == "ok") 0 else 1)
 }
@@ -219,3 +235,18 @@ private val HighContrast = darkColorScheme(
     onSurfaceVariant = Color.White,
     outline = Color.White,
 )
+
+/** A still cast for the start-up check. */
+private object SmokeSession : CastSession {
+    override val rendererName = "Smoke test"
+    override val title = "smoke.mp4"
+    override val playing = false
+    override val position = com.ks.beam.core.Position(0, 0)
+    override val labels = com.ks.beam.ui.CastLabels()
+    override val volume: Int? = null
+    override fun setVolume(level: Int) {}
+    override fun togglePlay() {}
+    override fun seekBy(delta: Long) {}
+    override fun seekTo(seconds: Long) {}
+    override fun stop() {}
+}
