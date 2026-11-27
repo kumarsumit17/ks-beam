@@ -151,6 +151,7 @@ fun BeamApp(
                     Column(Modifier.widthIn(max = if (twoPanes) 1200.dp else 720.dp).fillMaxSize().padding(20.dp)) {
                         Header(state)
                         Spacer(Modifier.height(16.dp))
+                        platform.updater?.let { UpdateNotice(it, Modifier.padding(bottom = 16.dp)) }
                         state.error?.let { ErrorBanner(it) { state.error = null } }
                         if (twoPanes && cast != null) {
                             Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
@@ -205,6 +206,7 @@ private fun Header(state: BeamState) {
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(1f),
         )
+        state.platform.updater?.let { UpdatesButton(it) }
         LanguageMenu(state.languageChoice, state::chooseLanguage)
     }
 }

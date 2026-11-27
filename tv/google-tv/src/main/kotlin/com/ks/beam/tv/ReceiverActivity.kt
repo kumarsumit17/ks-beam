@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.media3.common.C
 import com.ks.beam.android.PrefsStore
+import com.ks.beam.android.androidUpdater
 import com.ks.beam.android.ProvideAndroidLanguage
 import com.ks.beam.android.systemLanguageTags
 import com.ks.beam.resources.Res
@@ -39,6 +40,8 @@ class ReceiverActivity : ComponentActivity() {
     private val settings by lazy { PrefsStore(getSharedPreferences("settings", MODE_PRIVATE)) }
     private var languageChoice by mutableStateOf(LanguageChoice.System)
     private var canShowOverApps by mutableStateOf(true)
+    // The TV app's own APK from KS Beam's releases, never the phone app's.
+    private val updater by lazy { androidUpdater(this, settings, tv = true) }
 
     // Android 17 asks before an app reaches the local network; the receiver starts once the user
     // has answered (it is tried either way).
@@ -69,9 +72,15 @@ class ReceiverActivity : ComponentActivity() {
                     },
                     canShowOverApps = canShowOverApps,
                     onAllowOverApps = ::openOverAppsSetting,
+                    updates = updater,
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        updater.close()
+        super.onDestroy()
     }
 
     override fun onStart() {

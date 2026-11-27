@@ -24,6 +24,8 @@ val installerVersion = versionName.takeIf { (it.substringBefore('.').toIntOrNull
 compose.desktop {
     application {
         mainClass = "com.ks.beam.mac.MainKt"
+        // The running version for the updater (ks.beam.version); 0.0.0 from source never checks by itself.
+        jvmArgs("-Dks.beam.version=$versionName")
         nativeDistributions {
             targetFormats(TargetFormat.Dmg)
             packageName = "KS Beam"

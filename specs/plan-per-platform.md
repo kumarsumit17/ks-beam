@@ -30,7 +30,7 @@ KS Beam differs from a media player in one way that shapes this plan: **while a 
 | Version | One tag for all four builds (`vX.Y.Z`) | Same | Same | Same + offset |
 | Accessibility | Buttons have text; the seek slider has no label or time value; renderer rows have no role | Same, and **`jdk.accessibility` is not in the runtime**, so Narrator and NVDA cannot see the app | TalkBack reads Compose text; slider unlabelled | Ready screen readable; `PlayerView` controls are TalkBack-ready; photos have no description |
 
-Other findings: KS Beam has no in-app updater (an open owner question in [Plan to v1](plan-v1.md)). Nothing here depends on one. The desktop interface is a phone layout in a window: one column, max 720 dp, which works but is not a desktop app.
+Other findings: KS Beam had no in-app updater (an open owner question in [Plan to v1](plan-v1.md), decided 2026-11-27: ks-utility's updater on every platform, from v1.7.0). Nothing here depends on one. The desktop interface is a phone layout in a window: one column, max 720 dp, which works but is not a desktop app.
 
 ## 2. The plan, per platform
 

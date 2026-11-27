@@ -13,8 +13,9 @@ Third-party dependencies are kept to the minimum.
 - Always use a maintained library for TLS, cryptography and other security-critical code. Never hand-write those.
 - Declare every dependency and its version in the version catalog `gradle/libs.versions.toml`; never write a version in a `build.gradle.kts`. Take only the artifacts used, not a whole BOM family for convenience.
 - No dependency for convenience alone (dependency injection, networking wrappers, test helpers, small utilities): write those by hand.
-- No dependency may pull in `INTERNET` or `ACCESS_NETWORK_STATE`: check the merged manifest after adding one ([Constraints](constraints.md)).
+- No dependency may add a permission or an internet connection of its own: check the merged manifest after adding one ([Constraints](constraints.md)). The only internet request is KS Beam's own update check, through ks-utility.
+- `androidx.core` (already in both Android apps through `activity-compose`) is named in the catalog for the updater's `FileProvider`, which hands the downloaded APK to the system installer.
 - No analytics, crash-reporting or ad SDKs, ever.
 - Libraries named in the other specs are candidates, not commitments. Justify each at the stage that first needs it.
 - Every new dependency is reported with the reason it is needed and what it adds to the dependency tree (`./gradlew :app:dependencies`), and recorded in `specs/log.md` in the same commit.
-- `ks-utility`, the suite's own generic utilities, is a dependency of this app: a git submodule at `ks-utility/`, pinned to a commit and included as a Gradle build (`com.ks:utility`). It is first-party and has no third-party dependencies. Generic helpers go there; application-specific code stays here. How it is wired: `ks-utility/specs/usage.md`.
+- `ks-utility`, the suite's own generic utilities, is a dependency of this app: a git submodule at `ks-utility/`, pinned to a commit and included as a Gradle build (`com.ks:utility`). It is first-party and has no third-party dependencies. KS Beam uses its language files and catalogue, and its update decisions (`com.ks.utility.appupdate`: versions, the right file per platform, checksums, the desktop installer). Generic helpers go there; application-specific code stays here. How it is wired: `ks-utility/specs/usage.md`.

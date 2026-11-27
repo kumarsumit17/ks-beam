@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <!-- Android 17 (target SDK 37) asks the user before an app reaches the local network. -->
     <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+    <!-- The updater hands a verified APK from KS Beam's GitHub releases to the system installer. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <application
         android:label="KS Beam"
         android:icon="@mipmap/ic_launcher"
@@ -19,5 +21,16 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:supportsRtl="true"
-        android:enableOnBackInvokedCallback="true" />
+        android:enableOnBackInvokedCallback="true">
+        <!-- The downloaded update (cache/update/), readable only by the installer it is given to. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.updates"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/update_paths" />
+        </provider>
+    </application>
 </manifest>

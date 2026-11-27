@@ -27,7 +27,7 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 | `desktop/mac/`, `desktop/windows/` | Desktop entry points (`DesktopOptions`: menus, title bar, Open With, single instance on Windows), keep-awake while casting (JNA: IOKit, kernel32), Now Playing and the media keys on macOS (`NowPlaying.kt`, JNA to the Objective-C runtime) and native packaging (.dmg, .msi) |
 
 ## Constraints
-- Local network only; the file server answers only the file being cast, at a random-token address (`specs/constraints.md`).
+- Local network only, except the daily update check to GitHub (`specs/constraints.md`); the file server answers only the file being cast, at a random-token address (`specs/constraints.md`).
 - A running cast holds the platform's cast lock (`BeamPlatform.castLock`): the sender is the TV's file server, so it must not sleep or be frozen (`specs/casting.md`, section 2).
 - The core stays dependency-free JVM code: `java.net`, `HttpURLConnection`, the platform XML parser (DOCTYPEs refused).
 - Icons: KS Beam's own everywhere, never a framework default (the suite's "App icons" rule): the adaptive launcher icon (`shared/src/androidMain/res/mipmap-anydpi-v26`, round and monochrome too), the TV banner, `desktop/mac/icon.icns`, `desktop/windows/icon.ico` and the window icon (`shared/src/desktopMain/resources/ks-beam-icon.png`). All are drawn from the launcher artwork.
@@ -50,11 +50,11 @@ To cast from the phone emulator or the desktop app to a renderer SSDP can't reac
 - Two Android apps since v1.1.0 (the suite rule "Phone and Google TV builds" in the workspace's `specs/platform-folders.md`): the phone app (`mobile/android`, `ks-beam-v<version>.apk`) is always the sender, and the Google TV app (`tv/google-tv`, `ks-beam-v<version>-google-tv.apk`) is always the receiver. The role comes from the app, never from the device.
 - Same package name, version and keystore, set once in the root `build.gradle.kts`; the TV app's `versionCode` adds 1,000,000,000. The TV manifest requires leanback, does not require a touchscreen or Wi-Fi, has the banner and sets `com.ks.beam.FORM_FACTOR` = `tv`.
 - Code both apps run goes in `shared/src/androidMain`, never copied between the two modules. The release workflow builds both (`tv-module`).
-- KS Beam has no in-app updater (an internet check is an open owner question, `specs/plan-v1.md`). If one is added, the phone app asks for `UpdatePlatform.ANDROID` and the TV app for `UpdatePlatform.GOOGLE_TV`.
+- ks-utility's updater on every platform (the owner's decision, 2026-11-27): `shared/src/jvmSharedMain/.../update/` (`GitHubUpdater`, `UpdateService`) and `ui/UpdateSection.kt` (the "App updates" button and dialog, and the notice). The phone app asks for `UpdatePlatform.ANDROID`, the TV app for `UpdatePlatform.GOOGLE_TV` (`androidUpdater(…, tv)`), the desktops for `UpdatePlatform.current()` with ks-utility's `DesktopInstaller`. The desktop version reaches the app as `-Dks.beam.version`.
 
 ## Releases
 - The suite rule "Build, test, release, no waiting" (`specs/releases.md`): every feature or fix is built, tested on the emulators or in CI, pushed to `dev` and released with the next tag, without asking anyone before the tag. Never commit or release while a test or CI fails.
-- A feature raises MINOR, a fix raises PATCH. Each platform has its own version: `android-vX.Y.Z` (phone app), `google-tv-vX.Y.Z` (TV app), `mac-vX.Y.Z`, `windows-vX.Y.Z` release only that build; a plain `vX.Y.Z` releases all four. A platform's next version is higher than both its own last tag and the last plain tag (KS-Suite `specs/versioning-signing.md`, "Platform tags"). KS Beam has no updater, so no bridge release.
+- A feature raises MINOR, a fix raises PATCH. Each platform has its own version: `android-vX.Y.Z` (phone app), `google-tv-vX.Y.Z` (TV app), `mac-vX.Y.Z`, `windows-vX.Y.Z` release only that build; a plain `vX.Y.Z` releases all four. A platform's next version is higher than both its own last tag and the last plain tag (KS-Suite `specs/versioning-signing.md`, "Platform tags"). KS Beam's updater (from v1.7.0) already reads platform tags, so no bridge release.
 - The owner's hand checks on real devices (a real TV and phone, the Mac window, Windows) happen after the release and never block it; what they find goes into the next version.
 
 ## Platform folders

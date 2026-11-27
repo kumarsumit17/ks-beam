@@ -27,7 +27,7 @@ sealed interface BeamError {
 }
 
 /** The interface's state. Runs network work on Dispatchers.IO; [scope] is the UI's scope. */
-class BeamState(private val platform: BeamPlatform, private val scope: CoroutineScope) {
+class BeamState(internal val platform: BeamPlatform, private val scope: CoroutineScope) {
     var renderers by mutableStateOf(emptyList<Renderer>()); private set
     var searching by mutableStateOf(false); private set
     private var chosen by mutableStateOf<Renderer?>(null)

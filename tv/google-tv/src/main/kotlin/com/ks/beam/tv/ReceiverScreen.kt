@@ -20,6 +20,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,6 +68,10 @@ import com.ks.beam.resources.receiver_over_apps_allow
 import com.ks.beam.resources.receiver_ready
 import com.ks.beam.ui.LanguageChoice
 import com.ks.beam.ui.LanguageMenu
+import com.ks.beam.ui.UpdateNotice
+import com.ks.beam.ui.UpdatesButton
+import com.ks.beam.ui.updateNoticeShown
+import com.ks.beam.update.UpdateService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
@@ -89,11 +94,12 @@ fun ReceiverScreen(
     onLanguage: (LanguageChoice) -> Unit,
     canShowOverApps: Boolean = true,
     onAllowOverApps: () -> Unit = {},
+    updates: UpdateService? = null,
 ) {
     MaterialTheme(colorScheme = darkColorScheme(primary = Accent, background = Color(0xFF0F0F14))) {
         Box(Modifier.fillMaxSize().background(Color(0xFF0F0F14))) {
             when (showing) {
-                null -> Ready(name, online, languageChoice, onLanguage, canShowOverApps, onAllowOverApps)
+                null -> Ready(name, online, languageChoice, onLanguage, canShowOverApps, onAllowOverApps, updates)
                 is NowShowing.Media -> if (target != null) Playback(target)
                 is NowShowing.Photo -> Photo(showing.url, showing.title)
                 is NowShowing.CannotPlay -> Message(stringResource(Res.string.receiver_cant_play, showing.title))
@@ -111,10 +117,14 @@ private fun Ready(
     onLanguage: (LanguageChoice) -> Unit,
     canShowOverApps: Boolean,
     onAllowOverApps: () -> Unit,
+    updates: UpdateService?,
 ) {
     Box(Modifier.fillMaxSize().padding(48.dp)) {
         val focus = remember { FocusRequester() }
-        Box(Modifier.align(Alignment.TopEnd).focusRequester(focus)) { LanguageMenu(choice, onLanguage) }
+        Row(Modifier.align(Alignment.TopEnd)) {
+            updates?.let { UpdatesButton(it) }
+            Box(Modifier.focusRequester(focus)) { LanguageMenu(choice, onLanguage) }
+        }
         LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
         Column(
             Modifier.align(Alignment.Center).widthIn(max = 900.dp),
@@ -123,12 +133,16 @@ private fun Ready(
         ) {
             // Every TV size lays out 960 x 540 dp; with the "over other apps" hint the banner is
             // smaller so everything fits inside the margins.
-            val compact = !canShowOverApps
-            Image(
-                painterResource(R.drawable.tv_banner), contentDescription = null,
-                modifier = if (compact) Modifier.size(224.dp, 126.dp) else Modifier.size(320.dp, 180.dp),
-            )
-            Spacer(Modifier.height(if (compact) 20.dp else 32.dp))
+            // A newer version found by the daily check also takes room: with both, no banner.
+            val notice = updates?.let { updateNoticeShown(it) } == true
+            val compact = !canShowOverApps || notice
+            if (canShowOverApps || !notice) {
+                Image(
+                    painterResource(R.drawable.tv_banner), contentDescription = null,
+                    modifier = if (compact) Modifier.size(224.dp, 126.dp) else Modifier.size(320.dp, 180.dp),
+                )
+                Spacer(Modifier.height(if (compact) 20.dp else 32.dp))
+            }
             Text(stringResource(Res.string.receiver_ready), color = Color.White, fontSize = 44.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(16.dp))
             Text(
@@ -155,6 +169,11 @@ private fun Ready(
                     // The button style's 20 sp line clips Devanagari at this size.
                     Text(stringResource(Res.string.receiver_over_apps_allow), fontSize = 20.sp, lineHeight = 30.sp)
                 }
+            }
+            // The remote reaches its buttons with down.
+            if (notice && updates != null) {
+                Spacer(Modifier.height(24.dp))
+                UpdateNotice(updates, Modifier.widthIn(max = 720.dp))
             }
         }
     }

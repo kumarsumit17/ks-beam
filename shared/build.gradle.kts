@@ -34,7 +34,11 @@ kotlin {
             implementation(libs.compose.resources)
             implementation(libs.kotlinx.coroutines.core)
         }
-        val jvmSharedMain by creating { dependsOn(commonMain.get()) }
+        val jvmSharedMain by creating {
+            dependsOn(commonMain.get())
+            // ks-utility's update decisions (versions, the right file, checksums): KS Beam's updater.
+            dependencies { implementation(libs.ks.utility) }
+        }
         val desktopMain by getting {
             dependsOn(jvmSharedMain)
             dependencies { implementation(libs.kotlinx.coroutines.swing) }
@@ -46,7 +50,10 @@ kotlin {
             }
         }
         androidMain.get().dependsOn(jvmSharedMain)
-        androidMain.dependencies { implementation(libs.kotlinx.coroutines.android) }
+        androidMain.dependencies {
+            implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.androidx.core) // FileProvider: the downloaded update for the system installer
+        }
     }
 }
 

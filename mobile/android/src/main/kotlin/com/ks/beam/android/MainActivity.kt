@@ -62,6 +62,14 @@ class MainActivity : ComponentActivity(), BeamPlatform {
     override val systemLanguages: List<String>
         get() = systemLanguageTags()
 
+    // The phone app's own APK from KS Beam's releases, never the TV app's.
+    override val updater by lazy { androidUpdater(this, settings, tv = false) }
+
+    override fun onDestroy() {
+        updater.close()
+        super.onDestroy()
+    }
+
     override suspend fun pickMedia(): MediaSource? {
         pending?.complete(null)
         val deferred = CompletableDeferred<MediaSource?>()

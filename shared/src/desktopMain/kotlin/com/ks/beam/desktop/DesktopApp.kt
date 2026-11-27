@@ -73,6 +73,12 @@ private class DesktopPlatform(
     override val extraRenderers: List<String> = listOfNotNull(System.getenv("KS_BEAM_RENDERER")?.takeIf { it.isNotBlank() })
     var window: Frame? = null
 
+    /** Stops a running cast before the updater quits the app for its installer. */
+    var beforeQuit: () -> Unit = {}
+
+    // Not during the start-up check (CI): it makes no internet request.
+    override val updater = if (System.getenv("KS_BEAM_SMOKE_TEST").isNullOrBlank()) desktopUpdater(settings) { beforeQuit() } else null
+
     override suspend fun pickMedia(): MediaSource? {
         // Runs on the Swing thread (Compose's main dispatcher); the modal dialog keeps events flowing.
         val dialog = FileDialog(window, null as String?, FileDialog.LOAD)
@@ -148,6 +154,7 @@ fun runDesktopApp(options: DesktopOptions) {
     val platform = DesktopPlatform(options.systemLanguages, options.keepAwake, options.explainFirewall, options.mediaSession)
     application {
         val state = rememberBeamState(platform)
+        platform.beforeQuit = state::stopBeforeExit
         // Quitting (closing the window, or the app menu's Quit on macOS) tells the TV to stop first.
         LaunchedEffect(state) {
             runCatching {

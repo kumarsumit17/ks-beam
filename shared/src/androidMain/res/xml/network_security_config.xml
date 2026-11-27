@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- DLNA is plain HTTP on the local network: discovery replies, device descriptions, control and the
-     media itself (specs/constraints.md). KS Beam makes no internet connections. -->
+     media itself (specs/constraints.md). The one internet request is the update check to GitHub,
+     over HTTPS (ks-utility's appupdate). -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

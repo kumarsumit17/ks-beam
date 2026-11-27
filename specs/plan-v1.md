@@ -27,4 +27,4 @@ tags: [plan, milestones]
 ## Open questions for the owner
 
 - Whether ks-jaiplayer should also offer a "receive casts" mode, or hand KS Beam's received videos to its player. Either would be a cross-repo contract.
-- App updates (ks-utility `app-update`): KS Beam already uses the local network; an internet check would be its only internet use.
+- ~~App updates~~: decided 2026-11-27. The owner chose to add ks-utility's updater on every platform (phone, Google TV, Mac, Windows), not the `no-updater` exception. Built in v1.7.0 ([Constraints](constraints.md)).

@@ -6,6 +6,8 @@ composeMaterial3 = "1.9.0"
 agp = "9.5.2"
 coroutines = "1.11.0"
 activity = "1.13.0"
+# Already in both apps through activity-compose; named for the updater's FileProvider.
+androidx-core = "1.18.0"
 media3 = "1.11.1"
 jna = "5.19.1"
 
@@ -29,6 +31,7 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 # Android entry point (Apache-2.0).
+androidx-core = { module = "androidx.core:core", version.ref = "androidx-core" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 
 # Google TV receiver playback (Apache-2.0).

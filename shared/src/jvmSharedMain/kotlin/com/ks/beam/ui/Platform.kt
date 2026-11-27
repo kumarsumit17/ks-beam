@@ -43,6 +43,9 @@ interface BeamPlatform {
      */
     fun castLock(session: CastSession): CastLock = CastLock.None
 
+    /** KS Beam's updates from its GitHub releases (the "App updates" section); null in tests. */
+    val updater: com.ks.beam.update.UpdateService? get() = null
+
     /** The OS's own colours (Android 12+: from the wallpaper); null keeps KS Beam's. */
     @Composable
     fun colorScheme(): ColorScheme? = null
