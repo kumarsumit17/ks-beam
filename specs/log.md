@@ -1,5 +1,7 @@
 # 2026-11-27
 
+* **Release**: `v1.4.0` (all platforms): plan step 6, R8 and ProGuard (phone APK 1.0 MB, TV APK 1.8 MB, dmg 58 MB, msi 48 MB), Windows screen readers.
+* **Update**: [Per-platform optimization plan](plan-per-platform.md): step 7 built (screen-reader labels, states and actions; large-text layout; Windows High Contrast). Fix: a change of text size, language or display size during a cast no longer stops it.
 * **Update**: links to the KS-Suite repository now name `kumasumit/ks-suite` (renamed, lower case).
 
 # 2026-11-26

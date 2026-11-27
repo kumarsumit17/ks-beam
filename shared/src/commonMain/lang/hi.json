@@ -13,6 +13,8 @@
   "cast.channel": "कास्ट करना",
   "cast.pending": "{file} कास्ट करने के लिए कोई टीवी या प्रोजेक्टर चुनें।",
   "cast.volume": "आवाज़",
+  "cast.position": "फ़ाइल में जगह",
+  "cast.positionOf": "{duration} में से {position}",
   "cast.play": "चलाएं",
   "cast.stop": "कास्ट करना बंद करें",
   "cast.seekBack": "10 सेकंड पीछे",

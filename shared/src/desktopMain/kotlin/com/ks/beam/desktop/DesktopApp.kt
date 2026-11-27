@@ -1,6 +1,10 @@
 package com.ks.beam.desktop
 
 import androidx.compose.runtime.Composable
+import java.awt.Toolkit
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.awt.ComposeWindow
@@ -82,6 +86,11 @@ private class DesktopPlatform(
             override fun close() = awake.close()
         }
     }
+
+    /** Windows High Contrast: black, white and yellow, as the system's contrast themes are. */
+    @Composable
+    override fun colorScheme(): ColorScheme? =
+        if (Toolkit.getDefaultToolkit().getDesktopProperty("win.highContrast.on") == true) HighContrast else null
 
     @Composable
     override fun ProvideLanguage(language: String, content: @Composable () -> Unit) {
@@ -196,3 +205,17 @@ private fun smokeTest(options: DesktopOptions) {
     File(path).writeText(result)
     kotlin.system.exitProcess(if (result == "ok") 0 else 1)
 }
+
+private val HighContrast = darkColorScheme(
+    primary = Color(0xFFFFFF00),
+    onPrimary = Color.Black,
+    secondaryContainer = Color.Black,
+    onSecondaryContainer = Color.White,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color.Black,
+    onSurface = Color.White,
+    surfaceVariant = Color.Black,
+    onSurfaceVariant = Color.White,
+    outline = Color.White,
+)

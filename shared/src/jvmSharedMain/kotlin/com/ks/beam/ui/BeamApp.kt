@@ -33,6 +33,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
+import com.ks.beam.resources.cast_position_of
+import com.ks.beam.resources.cast_position
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import com.ks.beam.resources.cast_volume
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
@@ -226,7 +235,8 @@ private fun ColumnScope.DevicePanel(state: BeamState) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(Res.string.devices_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
         if (state.searching) {
-            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+            val searchingLabel = stringResource(Res.string.devices_searching)
+            CircularProgressIndicator(Modifier.size(18.dp).semantics { contentDescription = searchingLabel }, strokeWidth = 2.dp)
         } else {
             TextButton(onClick = state::search) { Text(stringResource(Res.string.devices_refresh)) }
         }
@@ -249,7 +259,10 @@ private fun ColumnScope.DevicePanel(state: BeamState) {
     Spacer(Modifier.height(16.dp))
     val waiting = state.pendingMedia
     if (waiting != null) {
-        Text(stringResource(Res.string.cast_pending, waiting.name), color = MaterialTheme.colorScheme.primary)
+        Text(
+            stringResource(Res.string.cast_pending, waiting.name), color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        )
         Spacer(Modifier.height(8.dp))
     } else if (state.renderers.isNotEmpty() && state.selected == null) {
         Text(stringResource(Res.string.devices_choose), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -279,7 +292,8 @@ private fun DeviceRow(r: Renderer, selected: Boolean, onClick: () -> Unit) {
             containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         ),
         border = if (selected) BorderStroke(2.dp, Accent) else null,
-        modifier = Modifier.fillMaxWidth(),
+        // Screen readers say which TV is chosen.
+        modifier = Modifier.fillMaxWidth().semantics { this.selected = selected },
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(r.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -300,12 +314,29 @@ private fun ColumnScope.CastPanel(state: BeamState, renderer: Renderer, fileName
 
     val duration = state.position.durationSeconds
     var dragging by remember { mutableStateOf<Float?>(null) }
+    // Screen readers: "Position in the file, 0:12:30 of 1:42:00", with back and forward 10 s as actions.
+    val positionLabel = stringResource(Res.string.cast_position)
+    val positionText = stringResource(
+        Res.string.cast_position_of,
+        AvTransport.formatTime(dragging?.toLong() ?: state.position.seconds),
+        AvTransport.formatTime(duration),
+    )
+    val backLabel = stringResource(Res.string.cast_seek_back)
+    val forwardLabel = stringResource(Res.string.cast_seek_forward)
     Slider(
         value = dragging ?: state.position.seconds.toFloat(),
         onValueChange = { dragging = it },
         onValueChangeFinished = { dragging?.let { state.seekTo(it.toLong()) }; dragging = null },
         valueRange = 0f..duration.coerceAtLeast(1).toFloat(),
         enabled = duration > 0,
+        modifier = Modifier.semantics {
+            contentDescription = positionLabel
+            stateDescription = positionText
+            customActions = listOf(
+                CustomAccessibilityAction(backLabel) { state.seekBy(-10); true },
+                CustomAccessibilityAction(forwardLabel) { state.seekBy(10); true },
+            )
+        },
     )
     Row {
         Text(AvTransport.formatTime(dragging?.toLong() ?: state.position.seconds), style = MaterialTheme.typography.bodySmall)
@@ -313,11 +344,21 @@ private fun ColumnScope.CastPanel(state: BeamState, renderer: Renderer, fileName
         if (duration > 0) Text(AvTransport.formatTime(duration), style = MaterialTheme.typography.bodySmall)
     }
     Spacer(Modifier.height(20.dp))
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-        FilledTonalButton(onClick = { state.seekBy(-10) }, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.cast_seek_back)) }
-        Button(onClick = state::togglePlay, modifier = Modifier.weight(1f)) {
+    val playPause: @Composable (Modifier) -> Unit = { m ->
+        Button(onClick = state::togglePlay, modifier = m) {
             Text(stringResource(if (state.playing) Res.string.common_pause else Res.string.cast_play))
         }
+    }
+    // Large text (the system's font size, 130% and up): play/pause gets its own row, so no word has to
+    // break in a third of the width.
+    val largeText = LocalDensity.current.fontScale >= 1.3f
+    if (largeText) {
+        playPause(Modifier.fillMaxWidth())
+        Spacer(Modifier.height(12.dp))
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+        FilledTonalButton(onClick = { state.seekBy(-10) }, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.cast_seek_back)) }
+        if (!largeText) playPause(Modifier.weight(1f))
         FilledTonalButton(onClick = { state.seekBy(10) }, modifier = Modifier.weight(1f)) { Text(stringResource(Res.string.cast_seek_forward)) }
     }
     state.volume?.let { level ->
@@ -331,7 +372,10 @@ private fun ColumnScope.CastPanel(state: BeamState, renderer: Renderer, fileName
             onValueChange = { dragging = it },
             onValueChangeFinished = { dragging?.let { state.setVolume(it.toInt()) }; dragging = null },
             valueRange = 0f..100f,
-            modifier = Modifier.semantics { contentDescription = volumeLabel },
+            modifier = Modifier.semantics {
+                contentDescription = volumeLabel
+                stateDescription = "${(dragging ?: level.toFloat()).toInt()}%"
+            },
         )
     }
     Spacer(Modifier.height(12.dp))
@@ -348,7 +392,9 @@ private fun ErrorBanner(error: BeamError, onClose: () -> Unit) {
     }
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF3A1D24)),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).clickable(onClick = onClose),
+        // Read out as soon as it appears.
+        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).clickable(onClick = onClose)
+            .semantics { liveRegion = LiveRegionMode.Polite },
     ) {
         Row(Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(text, modifier = Modifier.weight(1f).padding(vertical = 8.dp))
