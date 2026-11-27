@@ -1,3 +1,7 @@
+# 2026-11-27
+
+* **Update**: links to the KS-Suite repository now name `kumasumit/ks-suite` (renamed, lower case).
+
 # 2026-11-26
 
 * **Update**: `ks-utility` moved from `v0.13.2` to `v0.14.0` before the release (only the Tauri apps' release workflows were added); the release workflow follows.

@@ -7,7 +7,7 @@ tags: [release, versioning, policy]
 
 # Releases
 
-The suite rule "Build, test, release, no waiting" (KS-Suite [release cycle](https://github.com/kumasumit/KS-Suite/blob/main/specs/release-cycle.md)), as KS Beam applies it.
+The suite rule "Build, test, release, no waiting" (KS-Suite [release cycle](https://github.com/kumasumit/ks-suite/blob/main/specs/release-cycle.md)), as KS Beam applies it.
 
 ## Build, test, release
 
@@ -20,7 +20,7 @@ The suite rule "Build, test, release, no waiting" (KS-Suite [release cycle](http
 ## Versions
 
 - `android-vX.Y.Z` releases only the phone app, `google-tv-vX.Y.Z` only the Google TV app, `mac-vX.Y.Z` and `windows-vX.Y.Z` only that desktop build; a plain `vX.Y.Z` releases all four. A change to shared code (the casting core, the interface, the language files) goes out with a plain tag.
-- A platform's next version is higher than both its own last tag and the last plain tag (KS-Suite [versioning and signing](https://github.com/kumasumit/KS-Suite/blob/main/specs/versioning-signing.md), "Platform tags").
+- A platform's next version is higher than both its own last tag and the last plain tag (KS-Suite [versioning and signing](https://github.com/kumasumit/ks-suite/blob/main/specs/versioning-signing.md), "Platform tags").
 - KS Beam has no in-app updater, so it needed no bridge release.
 
 ## The owner's hand checks
