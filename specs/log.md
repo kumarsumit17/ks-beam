@@ -1,5 +1,6 @@
 # 2026-11-27
 
+* **Update**: fix: the dmg and msi always carried version 1.0.0 (the build script's `packageVersion = packageVersion` named the packaging block's own unset property, so the version from the tag never reached it). Since 1.0.1 every Mac app reported 1.0.0 and every Windows installer was 1.0.0. Released as `mac-v1.6.1` and `windows-v1.5.1`. `mac-v1.6.0` was released first and reports 1.0.0.
 * **Update**: [Per-platform optimization plan](plan-per-platform.md): step 8 built: macOS Now Playing and the media keys (MPNowPlayingInfoCenter, MPRemoteCommandCenter through JNA), part of the Mac cast lock.
 * **Release**: `v1.5.0` (all platforms): plan step 7, screen readers, large text, Windows High Contrast, and the config-change fix.
 * **Release**: `v1.4.0` (all platforms): plan step 6, R8 and ProGuard (phone APK 1.0 MB, TV APK 1.8 MB, dmg 58 MB, msi 48 MB), Windows screen readers.
