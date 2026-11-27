@@ -1,5 +1,6 @@
 # 2026-11-27
 
+* **Update**: [Releases](releases.md) follow the suite's new rule "DEV, test, approval, production" (KS-Suite 6170b83): DEV builds are rehearsals on `dev`, a production tag needs the owner's approval for KS Beam and that platform, a new ks-utility version never starts a release, and release notes record the ks-utility version. `v1.7.2` was the initial-rollout release.
 * **Release**: `v1.7.1` (all platforms): ks-utility's updater on the phone, Google TV, Mac and Windows. Then `v1.7.2` (all platforms) on ks-utility `v0.18.4`. Both signed with the suite key and attested; each has the phone and TV APKs and AABs, the arm64 dmg and the x64 msi. `v1.7.0` was refused by the release workflow (pin not the newest) and published nothing.
 * **Update**: `ks-utility` moved from `v0.18.3` to `v0.18.4` (the owner: every app releases fresh on the newest ks-utility); released as `v1.7.2`.
 * **Update**: `ks-utility` moved from `v0.15.0` to `v0.18.1`, then `v0.18.3` (the release workflow refused `v1.7.0`, tagged while the pin was not the newest; it published nothing, and the updater ships as `v1.7.1`); the release workflow and `ks-utility-bump.yml` call ks-utility's shared workflows at `@main` (the owner's decision, KS-Suite aa0ea92: `main` always equals ks-utility's newest release), so only the code pin moves with each new tag.

@@ -1,21 +1,25 @@
 ---
 type: Policy
 title: Releases
-description: How KS Beam is released: build, test, release without waiting, one version per platform or one for all, and the owner's hand checks afterwards.
+description: How KS Beam is released: DEV builds on dev, automated and hand tests, the owner's approval per platform, then production; one version per platform or one for all.
 tags: [release, versioning, policy]
 ---
 
 # Releases
 
-The suite rule "Build, test, release, no waiting" (KS-Suite [release cycle](https://github.com/kumasumit/ks-suite/blob/main/specs/release-cycle.md)), as KS Beam applies it.
+The suite rule "DEV, test, approval, production" (KS-Suite [release cycle](https://github.com/kumasumit/ks-suite/blob/main/specs/release-cycle.md), from 2026-11-27, replacing "build, test, release, no waiting"), as KS Beam applies it. `v1.7.2` on ks-utility `v0.18.4` was KS Beam's initial-rollout release under the old rule.
 
-## Build, test, release
+## DEV, test, approval, production
 
-- Every feature or fix is built, tested on the emulators (`scripts/emulators.sh` in the KS-Suite workspace) or in CI, pushed to `dev` and released with the next tag. Nobody is asked before a tag.
+- All work is on `dev`, which starts from `main` (the latest production release). Every feature or fix is tested automatically: the tests, CI, and the emulators (`scripts/emulators.sh` in the KS-Suite workspace).
+- A DEV build is a rehearsal of the release workflow on `dev` (a manual run with a version and a platform: no attestation, no release). The owner tests it by hand on real devices; fixes go into new DEV builds.
+- A production tag (plain or platform) is pushed only after the owner's explicit approval, in the conversation, for KS Beam and for that platform. Approval for one platform never covers another. The one exception is a platform's first-ever release (automated tests and signing are enough).
+- A new ks-utility version moves the pin on `dev` (the bump workflow) but never starts a production release.
 - Never commit or release while a test or CI fails.
 - A feature raises MINOR, a fix raises PATCH.
+- Android builds are always signed with the suite key and the signature is verified; the macOS and Windows builds may ship unsigned. Every release has `SHA256SUMS`.
 - At a release `main` fast-forwards to `dev`, then the tag is pushed; the release workflow (`.github/workflows/release.yml`, ks-utility's shared workflow) builds, signs, attests and publishes. The published files are checked afterwards: names, version codes, the suite certificate, attestations.
-- The release notes say what changed in plain words and anything a user must do (for example, Windows users of 1.1.0 or earlier uninstall first).
+- The release notes say what changed in plain words, anything a user must do (for example, Windows users of 1.1.0 or earlier uninstall first), and the ks-utility version the release was built on.
 
 ## Versions
 
@@ -25,4 +29,4 @@ The suite rule "Build, test, release, no waiting" (KS-Suite [release cycle](http
 
 ## The owner's hand checks
 
-- Checks on real devices (a real TV and phone on one network, the Mac window, Windows) come after the release and never block it. What they find goes into the next version.
+- Checks on real devices (a real TV and phone on one network, the Mac window, Windows) are made on the DEV build, before the owner approves that platform's production release.
