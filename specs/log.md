@@ -1,5 +1,6 @@
 # 2026-11-27
 
+* **Update**: `ks-utility` moved from `v0.14.0` to `v0.15.0` (ks-suite-check, DesktopInstaller, the bump workflow); the release workflow follows to `@v0.15.0`, and `.github/workflows/ks-utility-bump.yml` moves the pin by itself from now on.
 * **Release**: `v1.6.2` (all platforms): KS Beam's own icon on every build. Signed with the suite key and attested; the dmg reports 1.6.2 and carries `icon.icns`, the msi carries `icon.ico`, the APKs carry the adaptive icon.
 * **Update**: KS Beam's own icon everywhere (the suite's "App icons" rule): `desktop/mac/icon.icns` and `desktop/windows/icon.ico` (16–1024 and 16–256 px, from the launcher artwork) for the .app, .dmg, Dock, .exe, installer and taskbar; the window icon; an adaptive Android icon with round and monochrome layers for the phone and TV apps. The Mac and Windows builds showed the Kotlin logo until now.
 * **Release**: `mac-v1.6.0`, `mac-v1.6.1` and `windows-v1.5.1`, the first platform tags: Now Playing and the media keys on the Mac, and the dmg and msi carrying their real version. Not marked latest; `v1.5.0` stays the latest release of every platform.

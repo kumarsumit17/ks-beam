@@ -64,7 +64,7 @@ To cast from the phone emulator or the desktop app to a renderer SSDP can't reac
 - Never rename, merge or remove these folders, and never add another top-level platform folder; the layout is a suite-wide rule.
 
 ## Shared code (`ks-utility`)
-- A git submodule at `ks-utility/`, pinned to a version tag (`v0.14.0`), included with `includeBuild("ks-utility/kotlin")`. After cloning, run `git submodule update --init`.
+- A git submodule at `ks-utility/`, pinned to a version tag (`v0.15.0`), included with `includeBuild("ks-utility/kotlin")`. After cloning, run `git submodule update --init`.
 - The language files go through ks-utility's `lang.mjs` (Gradle tasks `languageResources` and `checkLanguageFiles`; needs Node 23.6+).
 - Never edit files under `ks-utility/` from this repo. Change them in the `ks-utility` repository, then move the pin in its own commit.
 

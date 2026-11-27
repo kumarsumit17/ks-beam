@@ -1,0 +1,22 @@
+name: Move to the newest ks-utility
+
+# When ks-utility releases a tag, this moves KS Beam's pin to it in its own commit on dev, after
+# the tests pass (KS-Suite specs/cross-repo.md, "Moving to a new ks-utility tag"; the shared
+# workflow is ks-utility's ks-utility-bump.yml). Daily as well, in case a notice was missed.
+on:
+  repository_dispatch:
+    types: [ks-utility-released]
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  bump:
+    permissions: { contents: write, issues: write }
+    uses: kumasumit/ks-utility/.github/workflows/ks-utility-bump.yml@v0.15.0
+    with:
+      kind: kotlin
+      java: true
+      test: ./gradlew :shared:desktopTest :shared:check
