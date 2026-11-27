@@ -30,6 +30,7 @@ Part of KS-Suite; the suite-wide rules in the workspace `CLAUDE.md` apply. Casts
 - Local network only; the file server answers only the file being cast, at a random-token address (`specs/constraints.md`).
 - A running cast holds the platform's cast lock (`BeamPlatform.castLock`): the sender is the TV's file server, so it must not sleep or be frozen (`specs/casting.md`, section 2).
 - The core stays dependency-free JVM code: `java.net`, `HttpURLConnection`, the platform XML parser (DOCTYPEs refused).
+- Icons: KS Beam's own everywhere, never a framework default (the suite's "App icons" rule): the adaptive launcher icon (`shared/src/androidMain/res/mipmap-anydpi-v26`, round and monochrome too), the TV banner, `desktop/mac/icon.icns`, `desktop/windows/icon.ico` and the window icon (`shared/src/desktopMain/resources/ks-beam-icon.png`). All are drawn from the launcher artwork.
 - Sender keys (`BeamState.handleKey`): Space plays or pauses, left and right seek 10 s, Esc stops, matching the TV remote; macOS adds its menu bar (⌘O, ⌘.), Windows adds Ctrl+O.
 
 ## Commands

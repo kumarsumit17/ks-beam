@@ -1,5 +1,6 @@
 # 2026-11-27
 
+* **Update**: KS Beam's own icon everywhere (the suite's "App icons" rule): `desktop/mac/icon.icns` and `desktop/windows/icon.ico` (16–1024 and 16–256 px, from the launcher artwork) for the .app, .dmg, Dock, .exe, installer and taskbar; the window icon; an adaptive Android icon with round and monochrome layers for the phone and TV apps. The Mac and Windows builds showed the Kotlin logo until now.
 * **Release**: `mac-v1.6.0`, `mac-v1.6.1` and `windows-v1.5.1`, the first platform tags: Now Playing and the media keys on the Mac, and the dmg and msi carrying their real version. Not marked latest; `v1.5.0` stays the latest release of every platform.
 * **Update**: fix: the dmg and msi always carried version 1.0.0 (the build script's `packageVersion = packageVersion` named the packaging block's own unset property, so the version from the tag never reached it). Since 1.0.1 every Mac app reported 1.0.0 and every Windows installer was 1.0.0. Released as `mac-v1.6.1` and `windows-v1.5.1`. `mac-v1.6.0` was released first and reports 1.0.0.
 * **Update**: [Per-platform optimization plan](plan-per-platform.md): step 8 built: macOS Now Playing and the media keys (MPNowPlayingInfoCenter, MPRemoteCommandCenter through JNA), part of the Mac cast lock.

@@ -1,6 +1,8 @@
 package com.ks.beam.desktop
 
 import androidx.compose.runtime.Composable
+import org.jetbrains.compose.resources.decodeToImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import java.awt.Toolkit
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.darkColorScheme
@@ -157,6 +159,8 @@ fun runDesktopApp(options: DesktopOptions) {
         Window(
             onCloseRequest = { state.stopBeforeExit(); exitApplication() },
             title = "KS Beam",
+            // KS Beam's own icon in the title bar and the taskbar (never the Kotlin logo).
+            icon = appIcon,
             state = rememberWindowState(size = DpSize(560.dp, 680.dp)),
             onPreviewKeyEvent = { state.handleKey(it) || options.extraKeys(it, state) },
         ) {
@@ -211,6 +215,7 @@ private fun smokeTest(options: DesktopOptions) {
     val path = System.getenv("KS_BEAM_SMOKE_TEST")?.takeIf { it.isNotBlank() } ?: return
     val result = runCatching {
         options.keepAwake().close()
+        checkNotNull(appIcon) { "the window icon is missing" }
         // macOS: Now Playing starts and stops (it returns null if its native calls fail).
         if (System.getProperty("os.name").startsWith("Mac")) {
             val media = options.mediaSession(SmokeSession) ?: error("Now Playing did not start")
@@ -249,4 +254,9 @@ private object SmokeSession : CastSession {
     override fun seekBy(delta: Long) {}
     override fun seekTo(seconds: Long) {}
     override fun stop() {}
+}
+
+/** KS Beam's icon (the launcher artwork) for the window and the taskbar. */
+private val appIcon: BitmapPainter? by lazy {
+    DesktopPlatform::class.java.getResourceAsStream("/ks-beam-icon.png")?.use { BitmapPainter(it.readAllBytes().decodeToImageBitmap()) }
 }

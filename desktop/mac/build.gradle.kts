@@ -32,6 +32,8 @@ compose.desktop {
             vendor = "KS-Suite"
             modules("java.prefs", "java.desktop", "java.xml", "jdk.unsupported")
             macOS {
+                // KS Beam's own icon for the .app, the .dmg and the Dock (never the Kotlin logo).
+                iconFile.set(project.file("icon.icns"))
                 bundleID = "com.ks.beam"
                 appCategory = "public.app-category.utilities"
                 // macOS 15+ asks before an app reaches the local network; this is the reason shown.

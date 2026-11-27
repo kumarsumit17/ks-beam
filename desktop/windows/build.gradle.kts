@@ -32,6 +32,8 @@ compose.desktop {
             // jdk.accessibility: the Java Access Bridge, so Narrator and NVDA can read the window.
             modules("java.prefs", "java.desktop", "java.xml", "jdk.unsupported", "jdk.accessibility")
             windows {
+                // KS Beam's own icon for the .exe, the installer, the Start menu and the taskbar.
+                iconFile.set(project.file("icon.ico"))
                 menu = true
                 menuGroup = "KS-Suite"
                 // No admin prompt (the owner's choice: no firewall rule at install; the app explains
